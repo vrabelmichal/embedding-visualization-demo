@@ -1,0 +1,6 @@
+{
+  "column": "magnitude",
+  "scale": "linear",
+  "colorScheme": "viridis",
+  "domain": [17, 23]
+}

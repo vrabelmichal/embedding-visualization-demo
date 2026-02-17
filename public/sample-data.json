@@ -1,0 +1,110 @@
+{
+  "metadata": {
+    "title": "Sample Low Surface Brightness Galaxies",
+    "description": "Demo dataset for interactive embedding visualization",
+    "totalObjects": 12
+  },
+  "colorMapping": {
+    "column": "magnitude",
+    "scale": "linear",
+    "colorScheme": "viridis",
+    "domain": [17, 23]
+  },
+  "objects": [
+    {
+      "coadd_object_id": "LSB_0001",
+      "embedding_x": -2.3,
+      "embedding_y": 1.5,
+      "image_url": "https://picsum.photos/seed/lsb0001/256/256",
+      "magnitude": 18.4,
+      "embedding_shape": "star"
+    },
+    {
+      "coadd_object_id": "LSB_0002",
+      "embedding_x": -1.1,
+      "embedding_y": 0.5,
+      "image_url": "https://picsum.photos/seed/lsb0002/256/256",
+      "magnitude": 19.2,
+      "embedding_shape": "triangle"
+    },
+    {
+      "coadd_object_id": "LSB_0003",
+      "embedding_x": 0.1,
+      "embedding_y": 1.9,
+      "image_url": "https://picsum.photos/seed/lsb0003/256/256",
+      "magnitude": 20.1,
+      "embedding_shape": "square"
+    },
+    {
+      "coadd_object_id": "LSB_0004",
+      "embedding_x": 1.7,
+      "embedding_y": 0.4,
+      "image_url": "https://picsum.photos/seed/lsb0004/256/256",
+      "magnitude": 21.5,
+      "embedding_shape": "hexagon"
+    },
+    {
+      "coadd_object_id": "LSB_0005",
+      "embedding_x": 2.4,
+      "embedding_y": -0.8,
+      "image_url": "https://picsum.photos/seed/lsb0005/256/256",
+      "magnitude": 22.1,
+      "embedding_shape": "diamond"
+    },
+    {
+      "coadd_object_id": "LSB_0006",
+      "embedding_x": -1.8,
+      "embedding_y": -1.2,
+      "image_url": "https://picsum.photos/seed/lsb0006/256/256",
+      "magnitude": 19.9,
+      "embedding_shape": "pentagon"
+    },
+    {
+      "coadd_object_id": "LSB_0007",
+      "embedding_x": 0.4,
+      "embedding_y": -2.1,
+      "image_url": "https://picsum.photos/seed/lsb0007/256/256",
+      "magnitude": 18.9,
+      "embedding_shape": "circle"
+    },
+    {
+      "coadd_object_id": "LSB_0008",
+      "embedding_x": 1.2,
+      "embedding_y": -1.6,
+      "image_url": "https://picsum.photos/seed/lsb0008/256/256",
+      "magnitude": 20.8,
+      "embedding_shape": "polygon"
+    },
+    {
+      "coadd_object_id": "LSB_0009",
+      "embedding_x": -0.7,
+      "embedding_y": -0.9,
+      "image_url": "https://picsum.photos/seed/lsb0009/256/256",
+      "magnitude": 17.9,
+      "embedding_shape": "rectangle"
+    },
+    {
+      "coadd_object_id": "LSB_0010",
+      "embedding_x": 2.1,
+      "embedding_y": 1.1,
+      "image_url": "https://picsum.photos/seed/lsb0010/256/256",
+      "magnitude": 19.7,
+      "embedding_shape": "star"
+    },
+    {
+      "coadd_object_id": "LSB_0011",
+      "embedding_x": -2.1,
+      "embedding_y": -2.3,
+      "image_url": "https://picsum.photos/seed/lsb0011/256/256",
+      "magnitude": 21.2,
+      "embedding_shape": "triangle"
+    },
+    {
+      "coadd_object_id": "LSB_0012",
+      "embedding_x": 0,
+      "embedding_y": 0,
+      "image_url": "https://picsum.photos/seed/lsb0012/256/256",
+      "magnitude": 20.4
+    }
+  ]
+}

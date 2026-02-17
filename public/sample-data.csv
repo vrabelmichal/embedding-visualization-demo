@@ -1,0 +1,13 @@
+coadd_object_id,embedding_x,embedding_y,image_url,color,embedding_shape,magnitude,redshift,surface_brightness
+LSB_0001,-2.3,1.5,https://picsum.photos/seed/lsb0001/256/256,#FF5733,star,18.4,0.045,24.1
+LSB_0002,-1.1,0.5,https://picsum.photos/seed/lsb0002/256/256,,triangle,19.2,0.052,23.8
+LSB_0003,0.1,1.9,https://picsum.photos/seed/lsb0003/256/256,#3388FF,square,20.1,0.038,24.9
+LSB_0004,1.7,0.4,https://picsum.photos/seed/lsb0004/256/256,,hexagon,21.5,0.041,25.2
+LSB_0005,2.4,-0.8,https://picsum.photos/seed/lsb0005/256/256,#66CC99,diamond,22.1,0.050,25.7
+LSB_0006,-1.8,-1.2,https://picsum.photos/seed/lsb0006/256/256,,pentagon,19.9,0.033,24.3
+LSB_0007,0.4,-2.1,https://picsum.photos/seed/lsb0007/256/256,,circle,18.9,0.030,23.5
+LSB_0008,1.2,-1.6,https://picsum.photos/seed/lsb0008/256/256,,polygon,20.8,0.047,24.6
+LSB_0009,-0.7,-0.9,https://picsum.photos/seed/lsb0009/256/256,#AA66FF,rectangle,17.9,0.028,23.1
+LSB_0010,2.1,1.1,https://picsum.photos/seed/lsb0010/256/256,,star,19.7,0.049,24.0
+LSB_0011,-2.1,-2.3,https://picsum.photos/seed/lsb0011/256/256,,triangle,21.2,0.055,25.1
+LSB_0012,0,0,https://picsum.photos/seed/lsb0012/256/256,,rectangle,20.4,0.042,24.4
