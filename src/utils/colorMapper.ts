@@ -31,7 +31,7 @@ export function getColorScale(
   data: AstronomicalObject[],
   mapping?: ColorMapping,
 ) {
-  if (!mapping?.column) return null
+  if (!mapping?.column || mapping.mode === 'categorical') return null
   const values = data
     .map((d) => Number(d[mapping.column!]))
     .filter((v) => Number.isFinite(v))
@@ -59,6 +59,13 @@ export function colorForObject(
   if (obj.color && typeof obj.color === 'string') {
     return hexToRgba(obj.color, 0.95)
   }
+  if (mapping?.mode === 'categorical' && mapping.column && mapping.valueToColor) {
+    const value = String(obj[mapping.column] ?? '').trim()
+    const color = mapping.valueToColor[value]
+    if (color) {
+      return hexToRgba(color, 0.92)
+    }
+  }
   if (colorScale && mapping?.column) {
     const value = Number(obj[mapping.column])
     if (Number.isFinite(value)) {
@@ -70,3 +77,17 @@ export function colorForObject(
 
 export const legendColors = (mapping?: ColorMapping) =>
   SCHEMES[mapping?.colorScheme ?? 'viridis'] ?? SCHEMES.viridis
+
+export function categoricalLegendItems(mapping?: ColorMapping): Array<{ color: string; label: string }> {
+  if (mapping?.mode !== 'categorical') return []
+
+  if (mapping.colorToLabel) {
+    return Object.entries(mapping.colorToLabel).map(([color, label]) => ({ color, label }))
+  }
+
+  if (mapping.valueToColor) {
+    return Object.entries(mapping.valueToColor).map(([label, color]) => ({ color, label }))
+  }
+
+  return []
+}

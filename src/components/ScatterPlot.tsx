@@ -10,6 +10,7 @@ import { useMemo } from 'react'
 interface ScatterPlotProps {
   data: AstronomicalObject[]
   colorMapping?: ColorMapping
+  pointSize: number
   viewState: EmbeddingViewState
   onViewStateChange: (params: any) => void
   onHover: (info: { object: AstronomicalObject; x: number; y: number } | null) => void
@@ -19,6 +20,7 @@ interface ScatterPlotProps {
 export function ScatterPlot({
   data,
   colorMapping,
+  pointSize,
   viewState,
   onViewStateChange,
   onHover,
@@ -36,21 +38,26 @@ export function ScatterPlot({
         getIcon: (d: AstronomicalObject) => getIconForShape(d.embedding_shape),
         getPosition: (d: AstronomicalObject) => [d.embedding_x, d.embedding_y, 0],
         getColor: (d: AstronomicalObject) => getColor(d),
-        getSize: () => 18,
+        getSize: pointSize,
         sizeUnits: 'pixels',
         sizeScale: 1,
+        sizeMinPixels: 4,
+        sizeMaxPixels: 64,
+        updateTriggers: {
+          getSize: pointSize,
+        },
         parameters: { depthTest: false },
         coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
         onHover: ({ object, x, y }) =>
           onHover(object ? ({ object, x, y } as any) : null),
         onClick: ({ object }) => onClick((object ?? null) as any),
       }),
-    [data, getColor, getIconForShape, onClick, onHover],
+    [data, getColor, getIconForShape, onClick, onHover, pointSize],
   )
 
   return (
     <DeckGL
-      views={[new OrthographicView({ id: 'ortho' })]}
+      views={[new OrthographicView({ id: 'ortho', flipY: false })]}
       controller={{
         dragPan: true,
         dragRotate: false,

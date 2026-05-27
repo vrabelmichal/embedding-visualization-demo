@@ -21,9 +21,17 @@ export interface AstronomicalObject {
 
 export interface ColorMapping {
   column?: string
+  mode?: 'continuous' | 'categorical'
   scale?: 'linear' | 'log' | 'quantile' | 'categorical'
   colorScheme?: string
   domain?: [number, number]
+  valueToColor?: Record<string, string>
+  colorToLabel?: Record<string, string>
+}
+
+export interface VisualizationConfig {
+  shapeLabels?: Partial<Record<EmbeddingShape, string>>
+  colorMapping?: ColorMapping
 }
 
 export interface VisualizationData {

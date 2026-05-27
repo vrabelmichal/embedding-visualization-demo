@@ -1,6 +1,6 @@
 import { ColorScale } from './ColorScale'
 import { ShapeLegend } from './ShapeLegend'
-import type { ColorMapping, EmbeddingShape } from '../utils/types'
+import type { ColorMapping, EmbeddingShape, VisualizationConfig } from '../utils/types'
 
 interface LegendProps {
   visible: boolean
@@ -9,13 +9,14 @@ interface LegendProps {
   min?: number
   max?: number
   shapes: EmbeddingShape[]
+  shapeLabels?: VisualizationConfig['shapeLabels']
 }
 
-export function Legend({ visible, onClose, mapping, min, max, shapes }: LegendProps) {
+export function Legend({ visible, onClose, mapping, min, max, shapes, shapeLabels }: LegendProps) {
   if (!visible) return null
 
   const showShapes = shapes.length > 1
-  const showScale = Boolean(mapping?.column)
+  const showScale = Boolean(mapping?.column || mapping?.mode === 'categorical')
 
   if (!showShapes && !showScale) return null
 
@@ -32,7 +33,7 @@ export function Legend({ visible, onClose, mapping, min, max, shapes }: LegendPr
       </div>
       <div className="space-y-4">
         {showScale && <ColorScale mapping={mapping} min={min} max={max} />}
-        {showShapes && <ShapeLegend shapes={shapes} />}
+        {showShapes && <ShapeLegend shapes={shapes} labels={shapeLabels} />}
       </div>
     </div>
   )

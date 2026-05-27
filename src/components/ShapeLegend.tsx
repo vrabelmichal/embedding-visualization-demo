@@ -3,9 +3,10 @@ import type { EmbeddingShape } from '../utils/types'
 
 interface ShapeLegendProps {
   shapes: EmbeddingShape[]
+  labels?: Partial<Record<EmbeddingShape, string>>
 }
 
-export function ShapeLegend({ shapes }: ShapeLegendProps) {
+export function ShapeLegend({ shapes, labels }: ShapeLegendProps) {
   if (!shapes.length) return null
   return (
     <div className="space-y-2">
@@ -17,7 +18,7 @@ export function ShapeLegend({ shapes }: ShapeLegendProps) {
               className="h-5 w-5 bg-indigo-400"
               style={{ clipPath: getShapeClipPath(shape) }}
             />
-            <span className="capitalize">{shape}</span>
+            <span className="capitalize">{labels?.[shape] ?? shape}</span>
           </div>
         ))}
       </div>

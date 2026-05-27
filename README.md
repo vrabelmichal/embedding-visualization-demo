@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# Interactive Embedding Visualization
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Web app for exploring 2D astronomical embeddings with high-performance rendering using deck.gl.
 
-Currently, two official plugins are available:
+## Run
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Build:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run build
 ```
+
+## Data Upload
+
+- Upload dataset files from the toolbar with Upload (supports .json and .csv).
+- Data points use embedding_x and embedding_y coordinates.
+- Coordinate display is Cartesian: origin at bottom-left, x increases left-to-right, y increases bottom-to-top.
+
+## Visualization Config Upload
+
+Use Upload config in the toolbar to apply optional visualization overrides from a JSON file.
+
+Supported overrides:
+
+- shapeLabels: custom display labels for shapes in the legend.
+- colorMapping: choose continuous or categorical behavior.
+
+Example continuous mapping:
+
+```json
+{
+  "shapeLabels": {
+    "star": "Candidate",
+    "circle": "Confirmed"
+  },
+  "colorMapping": {
+    "type": "continuous",
+    "column": "magnitude",
+    "scale": "linear",
+    "min": 17,
+    "max": 23,
+    "colorScheme": "viridis"
+  }
+}
+```
+
+Example categorical mapping:
+
+```json
+{
+  "colorMapping": {
+    "type": "categorical",
+    "column": "class",
+    "categories": {
+      "spiral": "#f97316",
+      "elliptical": "#0ea5e9"
+    }
+  }
+}
+```
+
+Categorical categories also accept a color-to-label dictionary:
+
+```json
+{
+  "colorMapping": {
+    "type": "categorical",
+    "column": "class",
+    "categories": {
+      "#f97316": "Spiral",
+      "#0ea5e9": "Elliptical"
+    }
+  }
+}
+```
+
+Notes:
+
+- For continuous mapping, scale supports linear, log, and quantile.
+- For categorical mapping, the selected column value is matched against category keys or labels.
+- A sample file is available at public/visualization-config.example.json.
+
+## Point Size Control
+
+The toolbar includes a Point size slider.
+
+- Default point size is 18.
+- You can drag the slider to increase or decrease marker size.
+- Use Default 18 in the toolbar to instantly reset to the default size.

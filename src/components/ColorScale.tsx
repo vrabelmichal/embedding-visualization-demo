@@ -1,5 +1,5 @@
 import type { ColorMapping } from '../utils/types'
-import { legendColors } from '../utils/colorMapper'
+import { categoricalLegendItems, legendColors } from '../utils/colorMapper'
 
 interface ColorScaleProps {
   mapping?: ColorMapping
@@ -8,7 +8,29 @@ interface ColorScaleProps {
 }
 
 export function ColorScale({ mapping, min, max }: ColorScaleProps) {
-  if (!mapping?.column) return null
+  if (!mapping) return null
+
+  if (mapping.mode === 'categorical') {
+    const items = categoricalLegendItems(mapping)
+    if (!items.length) return null
+
+    return (
+      <div className="space-y-2">
+        <p className="text-xs font-semibold text-slate-200">{mapping.column ?? 'Category'}</p>
+        <div className="space-y-1.5">
+          {items.map((item) => (
+            <div key={`${item.label}-${item.color}`} className="flex items-center gap-2 text-[11px] text-slate-300">
+              <span className="h-3 w-3 rounded-sm border border-slate-700" style={{ backgroundColor: item.color }} />
+              <span>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (!mapping.column) return null
+
   const colors = legendColors(mapping)
   const gradient = `linear-gradient(to right, ${colors.join(',')})`
 

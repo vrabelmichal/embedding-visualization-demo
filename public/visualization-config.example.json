@@ -1,0 +1,15 @@
+{
+  "shapeLabels": {
+    "star": "Candidate",
+    "circle": "Confirmed",
+    "diamond": "Flagged"
+  },
+  "colorMapping": {
+    "type": "continuous",
+    "column": "magnitude",
+    "scale": "linear",
+    "min": 17,
+    "max": 23,
+    "colorScheme": "viridis"
+  }
+}

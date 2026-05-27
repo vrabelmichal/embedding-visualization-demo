@@ -8,7 +8,10 @@ import { LoadingState } from './LoadingState'
 import { useDataLoader } from '../hooks/useDataLoader'
 import { useViewState } from '../hooks/useViewState'
 import { useShapeMapping } from '../hooks/useShapeMapping'
-import type { AstronomicalObject } from '../utils/types'
+import type { AstronomicalObject, ColorMapping, VisualizationConfig } from '../utils/types'
+import { parseVisualizationConfigFile } from '../utils/visualizationConfig'
+
+const DEFAULT_POINT_SIZE = 18
 
 export function EmbeddingViewer() {
   const { data, loading, error, loadFromFile } = useDataLoader()
@@ -26,19 +29,55 @@ export function EmbeddingViewer() {
   } | null>(null)
   const [selected, setSelected] = useState<AstronomicalObject | null>(null)
   const [legendVisible, setLegendVisible] = useState(true)
+  const [pointSize, setPointSize] = useState(DEFAULT_POINT_SIZE)
+  const [config, setConfig] = useState<VisualizationConfig | null>(null)
+  const [configError, setConfigError] = useState<string | null>(null)
+  const [showConfigHelp, setShowConfigHelp] = useState(false)
+
+  const effectiveColorMapping = useMemo<ColorMapping | undefined>(() => {
+    if (!config?.colorMapping) {
+      return data?.colorMapping
+    }
+
+    return {
+      ...data?.colorMapping,
+      ...config.colorMapping,
+      mode: config.colorMapping.mode ?? data?.colorMapping?.mode,
+    }
+  }, [config?.colorMapping, data?.colorMapping])
 
   const stats = useMemo(() => {
-    if (!objects.length || !data?.colorMapping?.column) return { min: undefined, max: undefined }
+    if (!objects.length || !effectiveColorMapping?.column || effectiveColorMapping.mode === 'categorical') {
+      return { min: undefined, max: undefined }
+    }
+
+    if (effectiveColorMapping.domain) {
+      return { min: effectiveColorMapping.domain[0], max: effectiveColorMapping.domain[1] }
+    }
+
     const values = objects
-      .map((d) => Number(d[data.colorMapping!.column!]))
+      .map((d) => Number(d[effectiveColorMapping.column!]))
       .filter((v) => Number.isFinite(v))
     return { min: Math.min(...values), max: Math.max(...values) }
-  }, [objects, data?.colorMapping])
+  }, [effectiveColorMapping, objects])
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
       loadFromFile(file)
+    }
+  }
+
+  const onConfigFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      const nextConfig = await parseVisualizationConfigFile(file)
+      setConfig(nextConfig)
+      setConfigError(null)
+    } catch {
+      setConfig(null)
+      setConfigError('Invalid config file. Please check the JSON format.')
     }
   }
 
@@ -51,13 +90,67 @@ export function EmbeddingViewer() {
           onReset={resetView}
           onToggleLegend={() => setLegendVisible((v) => !v)}
           legendVisible={legendVisible}
+          pointSize={pointSize}
+          defaultPointSize={DEFAULT_POINT_SIZE}
+          onPointSizeChange={setPointSize}
+          onResetPointSize={() => setPointSize(DEFAULT_POINT_SIZE)}
         />
         <label className="flex cursor-pointer items-center gap-1 rounded-md bg-slate-800/80 px-2 py-2 text-xs text-slate-100 shadow hover:bg-slate-700 md:text-sm">
           <span className="hidden md:inline">Upload</span>
           <span className="md:hidden">⬆</span>
           <input type="file" accept=".csv,.json" className="hidden" onChange={onFileChange} />
         </label>
+        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-slate-800/80 px-2 py-2 text-xs text-slate-100 shadow hover:bg-slate-700 md:text-sm">
+          <span className="hidden md:inline">Upload config</span>
+          <span className="md:hidden">Cfg</span>
+          <input type="file" accept=".json" className="hidden" onChange={onConfigFileChange} />
+        </label>
+        <button
+          type="button"
+          onClick={() => setShowConfigHelp((v) => !v)}
+          className="rounded-md bg-slate-800/80 px-2 py-2 text-xs text-slate-100 shadow hover:bg-slate-700 md:text-sm"
+          aria-expanded={showConfigHelp}
+          aria-controls="config-format-help"
+        >
+          Config format
+        </button>
       </div>
+
+      {showConfigHelp && (
+        <div
+          id="config-format-help"
+          className="absolute left-3 top-16 z-30 max-w-xl rounded-md border border-slate-700 bg-slate-900/95 p-3 text-xs text-slate-200 shadow-xl"
+        >
+          <p className="mb-2 font-semibold text-slate-100">Visualization config JSON</p>
+          <pre className="max-h-56 overflow-auto rounded bg-slate-950 p-2 text-[11px] text-slate-300">{`{
+  "shapeLabels": {
+    "star": "Candidate",
+    "circle": "Confirmed"
+  },
+  "colorMapping": {
+    "type": "continuous",
+    "column": "magnitude",
+    "scale": "linear",
+    "min": 17,
+    "max": 23,
+    "colorScheme": "viridis"
+  }
+}`}</pre>
+          <pre className="mt-2 max-h-56 overflow-auto rounded bg-slate-950 p-2 text-[11px] text-slate-300">{`{
+  "colorMapping": {
+    "type": "categorical",
+    "column": "class",
+    "categories": {
+      "spiral": "#f97316",
+      "elliptical": "#0ea5e9"
+    }
+  }
+}`}</pre>
+          <p className="mt-2 text-[11px] text-slate-400">
+            For categorical mappings, categories may also be provided as a color-to-label dictionary.
+          </p>
+        </div>
+      )}
 
       {loading && (
         <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
@@ -69,12 +162,18 @@ export function EmbeddingViewer() {
           {error}
         </div>
       )}
+      {configError && (
+        <div className="absolute left-4 top-28 z-30 max-w-xs rounded-md border border-amber-500/60 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          {configError}
+        </div>
+      )}
 
       <div className="relative h-full w-full">
         {!loading && (
           <ScatterPlot
             data={objects}
-            colorMapping={data?.colorMapping}
+            colorMapping={effectiveColorMapping}
+            pointSize={pointSize}
             viewState={viewState}
             onViewStateChange={onViewStateChange}
             onHover={setHovered}
@@ -86,10 +185,11 @@ export function EmbeddingViewer() {
       <Legend
         visible={legendVisible}
         onClose={() => setLegendVisible(false)}
-        mapping={data?.colorMapping}
+        mapping={effectiveColorMapping}
         min={stats.min}
         max={stats.max}
         shapes={uniqueShapes}
+        shapeLabels={config?.shapeLabels}
       />
 
       <ImageTooltip hovered={hovered} />
