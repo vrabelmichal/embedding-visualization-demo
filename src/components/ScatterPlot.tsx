@@ -28,8 +28,9 @@ function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: 
   const size = 128
   const padding = 2
   const cols = 3
+  const allIcons = [...ALL_SHAPES, 'ring' as EmbeddingShape]
   const atlasWidth = cols * (size + padding) + padding
-  const rows = Math.ceil(ALL_SHAPES.length / cols)
+  const rows = Math.ceil(allIcons.length / cols)
   const atlasHeight = rows * (size + padding) + padding
 
   const canvas = document.createElement('canvas')
@@ -40,7 +41,7 @@ function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: 
 
   const mapping: Record<string, { x: number; y: number; width: number; height: number; anchorY?: number; mask?: boolean }> = {}
 
-  ALL_SHAPES.forEach((shape, i) => {
+  allIcons.forEach((shape, i) => {
     const row = Math.floor(i / cols)
     const col = i % cols
     const x = padding + col * (size + padding)
@@ -49,7 +50,7 @@ function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: 
     mapping[shape] = { x, y, width: size, height: size, anchorY: size / 2, mask: true }
   })
 
-  ALL_SHAPES.forEach((shape, i) => {
+  allIcons.forEach((shape, i) => {
     const row = Math.floor(i / cols)
     const col = i % cols
     const x = padding + col * (size + padding)
@@ -63,13 +64,24 @@ function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: 
 
     shapeCtx.clearRect(0, 0, size, size)
     shapeCtx.fillStyle = '#ffffff'
-    const shapePaths = getShapePoints(shape)
-    if (shape === 'circle') {
+
+    if (shape === 'ring') {
+      const cx = size / 2
+      const cy = size / 2
+      const outerR = size / 2
+      const innerR = size / 2 - size * 0.12
+      shapeCtx.beginPath()
+      shapeCtx.arc(cx, cy, outerR, 0, Math.PI * 2)
+      shapeCtx.arc(cx, cy, innerR, 0, Math.PI * 2, true)
+      shapeCtx.closePath()
+      shapeCtx.fill()
+    } else if (shape === 'circle') {
       shapeCtx.beginPath()
       shapeCtx.arc(size / 2, size / 2, size / 2, 0, Math.PI * 2)
       shapeCtx.closePath()
       shapeCtx.fill()
     } else {
+      const shapePaths = getShapePoints(shape)
       shapeCtx.beginPath()
       shapePaths.forEach(([px, py], idx) => {
         const sx = (px / 100) * size
@@ -165,9 +177,9 @@ export function ScatterPlot({
       pickable: false,
       iconAtlas: atlas,
       iconMapping: mapping,
-      getIcon: () => 'circle',
+      getIcon: () => 'ring',
       getPosition: (d: AstronomicalObject) => [d.embedding_x, d.embedding_y, 0],
-      getColor: () => [255, 59, 48, 128],
+      getColor: () => [255, 59, 48],
       getSize: pointSize * 1.5,
       sizeUnits: 'pixels',
       sizeScale: 1,
