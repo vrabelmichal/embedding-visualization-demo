@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import type { LoadedData } from '../utils/types'
-import { loadCSV, loadFile, loadJSON } from '../utils/dataLoader'
+import { loadCSV, loadCSVGzip, loadFile, loadJSON } from '../utils/dataLoader'
 
 const DEFAULT_URL = '/sample-data.json'
 
@@ -15,7 +15,11 @@ export function useDataLoader(initialUrl = DEFAULT_URL) {
   const loadFromUrl = useCallback(async (target: string) => {
     setState({ data: null, loading: true, error: null })
     try {
-      const data = target.endsWith('.csv') ? await loadCSV(target) : await loadJSON(target)
+      const data = target.endsWith('.csv.gz')
+        ? await loadCSVGzip(target)
+        : target.endsWith('.csv')
+          ? await loadCSV(target)
+          : await loadJSON(target)
       setState({ data, loading: false, error: null })
     } catch (error) {
       setState({

@@ -109,7 +109,7 @@ export function EmbeddingViewer() {
         <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
           <span className="hidden md:inline">Upload</span>
           <span className="md:hidden">⬆</span>
-          <input type="file" accept=".csv,.json" className="hidden" onChange={onFileChange} />
+          <input type="file" accept=".csv,.csv.gz,.json" className="hidden" onChange={onFileChange} />
         </label>
         <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
           <span className="hidden md:inline">Upload config</span>
