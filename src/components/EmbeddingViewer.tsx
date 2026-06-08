@@ -12,6 +12,9 @@ import type { AstronomicalObject, ColorMapping, VisualizationConfig } from '../u
 import { parseVisualizationConfigFile } from '../utils/visualizationConfig'
 
 const DEFAULT_POINT_SIZE = 18
+const DEFAULT_PREVIEW_SIZE = 160
+const PREVIEW_SIZE_MIN = 64
+const PREVIEW_SIZE_MAX = 400
 
 export function EmbeddingViewer() {
   const { data, loading, error, loadFromFile } = useDataLoader()
@@ -30,6 +33,8 @@ export function EmbeddingViewer() {
   const [selected, setSelected] = useState<AstronomicalObject | null>(null)
   const [legendVisible, setLegendVisible] = useState(true)
   const [pointSize, setPointSize] = useState(DEFAULT_POINT_SIZE)
+  const [previewSize, setPreviewSize] = useState(DEFAULT_PREVIEW_SIZE)
+  const [showDisplaySettings, setShowDisplaySettings] = useState(false)
   const [config, setConfig] = useState<VisualizationConfig | null>(null)
   const [configError, setConfigError] = useState<string | null>(null)
   const [showConfigHelp, setShowConfigHelp] = useState(false)
@@ -94,6 +99,12 @@ export function EmbeddingViewer() {
           defaultPointSize={DEFAULT_POINT_SIZE}
           onPointSizeChange={setPointSize}
           onResetPointSize={() => setPointSize(DEFAULT_POINT_SIZE)}
+          previewSize={previewSize}
+          defaultPreviewSize={DEFAULT_PREVIEW_SIZE}
+          onPreviewSizeChange={setPreviewSize}
+          onResetPreviewSize={() => setPreviewSize(DEFAULT_PREVIEW_SIZE)}
+          showDisplaySettings={showDisplaySettings}
+          onToggleDisplaySettings={() => setShowDisplaySettings((v) => !v)}
         />
         <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
           <span className="hidden md:inline">Upload</span>
@@ -197,7 +208,7 @@ export function EmbeddingViewer() {
         shapeLabels={config?.shapeLabels}
       />
 
-      <ImageTooltip hovered={hovered} />
+      <ImageTooltip hovered={hovered} size={previewSize} />
       <DetailPanel selected={selected} onClose={() => setSelected(null)} />
     </div>
   )
