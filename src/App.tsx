@@ -5,7 +5,6 @@ import { useVisualizationStore } from './store/visualizationStore'
 function App() {
   const [showInfo, setShowInfo] = useState(false)
   const theme = useVisualizationStore((s) => s.theme)
-  const toggleTheme = useVisualizationStore((s) => s.toggleTheme)
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark')
@@ -27,15 +26,6 @@ function App() {
             Hover: image. Click/tap: details. Use controls to zoom/reset/legend.
           </p>
         )}
-        <div className="ml-auto">
-          <button
-            onClick={toggleTheme}
-            className="rounded-md bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? '🌙' : '☀️'}
-          </button>
-        </div>
       </header>
       <EmbeddingViewer />
     </div>

@@ -5,7 +5,7 @@ import type { AstronomicalObject, ColorMapping } from '../utils/types'
 import { useShapeMapping } from '../hooks/useShapeMapping'
 import { useColorMapping } from '../hooks/useColorMapping'
 import type { EmbeddingViewState } from '../hooks/useViewState'
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 
 interface ScatterPlotProps {
   data: AstronomicalObject[]
@@ -28,6 +28,15 @@ export function ScatterPlot({
 }: ScatterPlotProps) {
   const { getIconForShape } = useShapeMapping(data)
   const { getColor } = useColorMapping(data, colorMapping)
+  const [mounted, setMounted] = useState(false)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      setMounted(true)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [])
 
   const layer = useMemo(
     () =>
@@ -55,20 +64,28 @@ export function ScatterPlot({
     [data, getColor, getIconForShape, onClick, onHover, pointSize],
   )
 
+  if (data.length === 0) {
+    return null
+  }
+
   return (
-    <DeckGL
-      views={[new OrthographicView({ id: 'ortho', flipY: false })]}
-      controller={{
-        dragPan: true,
-        dragRotate: false,
-        scrollZoom: true,
-        touchZoom: true,
-        touchRotate: false,
-      }}
-      layers={[layer]}
-      viewState={viewState as any}
-      onViewStateChange={onViewStateChange}
-      style={{ width: '100%', height: '100%' }}
-    />
+    <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+      {mounted && (
+        <DeckGL
+          views={[new OrthographicView({ id: 'ortho', flipY: false })]}
+          controller={{
+            dragPan: true,
+            dragRotate: false,
+            scrollZoom: true,
+            touchZoom: true,
+            touchRotate: false,
+          }}
+          layers={[layer]}
+          viewState={viewState as any}
+          onViewStateChange={onViewStateChange}
+          style={{ width: '100%', height: '100%' }}
+        />
+      )}
+    </div>
   )
 }

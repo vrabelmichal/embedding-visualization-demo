@@ -6,7 +6,7 @@ interface ImageTooltipProps {
 }
 
 export function ImageTooltip({ hovered }: ImageTooltipProps) {
-  if (!hovered) return null
+  if (!hovered || !hovered.object.image_url) return null
   const { object, x, y } = hovered
   const clipPath = getShapeClipPath((object.embedding_shape as any) || 'rectangle')
 

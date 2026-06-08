@@ -169,7 +169,7 @@ export function EmbeddingViewer() {
       )}
 
       <div className="relative h-full w-full">
-        {!loading && (
+        {!loading && objects.length > 0 && (
           <ScatterPlot
             data={objects}
             colorMapping={effectiveColorMapping}
@@ -179,6 +179,11 @@ export function EmbeddingViewer() {
             onHover={setHovered}
             onClick={(obj) => setSelected(obj)}
           />
+        )}
+        {!loading && objects.length === 0 && (
+          <div className="flex h-full w-full items-center justify-center text-slate-400 dark:text-slate-500">
+            <p className="text-lg">Upload a CSV or JSON file to visualize embeddings</p>
+          </div>
         )}
       </div>
 

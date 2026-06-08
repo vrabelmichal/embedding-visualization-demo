@@ -19,9 +19,9 @@ export async function loadCSV(url: string): Promise<VisualizationData> {
   }
   const text = await response.text()
   const parsed = Papa.parse(text, { header: true, dynamicTyping: true })
-  const objects = (parsed.data as Papa.ParseResult<AstronomicalObject>['data']).map(
-    normalizeObject,
-  )
+  const objects = (parsed.data as Papa.ParseResult<AstronomicalObject>['data'])
+    .map(normalizeObject)
+    .filter(isValidObject)
   return { objects }
 }
 
@@ -36,9 +36,9 @@ export async function loadFile(file: File): Promise<VisualizationData> {
   if (ext.endsWith('.csv')) {
     const text = await file.text()
     const parsed = Papa.parse(text, { header: true, dynamicTyping: true })
-    const objects = (parsed.data as Papa.ParseResult<AstronomicalObject>['data']).map(
-      normalizeObject,
-    )
+    const objects = (parsed.data as Papa.ParseResult<AstronomicalObject>['data'])
+      .map(normalizeObject)
+      .filter(isValidObject)
     return { objects }
   }
   throw new Error('Unsupported file format. Please provide CSV or JSON.')
@@ -54,4 +54,8 @@ function normalizeObject(obj: any): AstronomicalObject {
     color: obj.color,
     embedding_shape: validateShape(obj.embedding_shape),
   }
+}
+
+function isValidObject(obj: AstronomicalObject): boolean {
+  return obj.coadd_object_id !== '' && obj.coadd_object_id !== 'undefined' && obj.coadd_object_id !== 'null'
 }

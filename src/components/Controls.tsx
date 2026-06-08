@@ -1,3 +1,5 @@
+import { useVisualizationStore } from '../store/visualizationStore'
+
 interface ControlsProps {
   onZoomIn: () => void
   onZoomOut: () => void
@@ -21,6 +23,9 @@ export function Controls({
   onPointSizeChange,
   onResetPointSize,
 }: ControlsProps) {
+  const theme = useVisualizationStore((s) => s.theme)
+  const toggleTheme = useVisualizationStore((s) => s.toggleTheme)
+
   return (
     <div className="flex flex-wrap items-center gap-1 md:gap-2">
       <IconButton label="Zoom in" onClick={onZoomIn} icon="＋" />
@@ -30,6 +35,11 @@ export function Controls({
         label="Toggle legend"
         onClick={onToggleLegend}
         icon={legendVisible ? '☰' : '☷'}
+      />
+      <IconButton
+        label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+        onClick={toggleTheme}
+        icon={theme === 'light' ? '🌙' : '☀️'}
       />
       <div className="flex items-center gap-2 rounded-md bg-white/80 px-2 py-1.5 text-xs text-slate-700 shadow dark:bg-slate-800/80 dark:text-slate-100">
         <label htmlFor="point-size" className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-200">
