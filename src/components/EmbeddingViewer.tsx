@@ -95,12 +95,12 @@ export function EmbeddingViewer() {
           onPointSizeChange={setPointSize}
           onResetPointSize={() => setPointSize(DEFAULT_POINT_SIZE)}
         />
-        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-slate-800/80 px-2 py-2 text-xs text-slate-100 shadow hover:bg-slate-700 md:text-sm">
+        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
           <span className="hidden md:inline">Upload</span>
           <span className="md:hidden">⬆</span>
           <input type="file" accept=".csv,.json" className="hidden" onChange={onFileChange} />
         </label>
-        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-slate-800/80 px-2 py-2 text-xs text-slate-100 shadow hover:bg-slate-700 md:text-sm">
+        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
           <span className="hidden md:inline">Upload config</span>
           <span className="md:hidden">Cfg</span>
           <input type="file" accept=".json" className="hidden" onChange={onConfigFileChange} />
@@ -108,7 +108,7 @@ export function EmbeddingViewer() {
         <button
           type="button"
           onClick={() => setShowConfigHelp((v) => !v)}
-          className="rounded-md bg-slate-800/80 px-2 py-2 text-xs text-slate-100 shadow hover:bg-slate-700 md:text-sm"
+          className="rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm"
           aria-expanded={showConfigHelp}
           aria-controls="config-format-help"
         >
@@ -119,10 +119,10 @@ export function EmbeddingViewer() {
       {showConfigHelp && (
         <div
           id="config-format-help"
-          className="absolute left-3 top-16 z-30 max-w-xl rounded-md border border-slate-700 bg-slate-900/95 p-3 text-xs text-slate-200 shadow-xl"
+          className="absolute left-3 top-16 z-30 max-w-xl rounded-md border border-slate-200 bg-white/95 p-3 text-xs text-slate-700 shadow-xl dark:border-slate-700 dark:bg-slate-900/95 dark:text-slate-200"
         >
-          <p className="mb-2 font-semibold text-slate-100">Visualization config JSON</p>
-          <pre className="max-h-56 overflow-auto rounded bg-slate-950 p-2 text-[11px] text-slate-300">{`{
+          <p className="mb-2 font-semibold text-slate-900 dark:text-slate-100">Visualization config JSON</p>
+          <pre className="max-h-56 overflow-auto rounded bg-slate-100 p-2 text-[11px] text-slate-700 dark:bg-slate-950 dark:text-slate-300">{`{
   "shapeLabels": {
     "star": "Candidate",
     "circle": "Confirmed"
@@ -136,7 +136,7 @@ export function EmbeddingViewer() {
     "colorScheme": "viridis"
   }
 }`}</pre>
-          <pre className="mt-2 max-h-56 overflow-auto rounded bg-slate-950 p-2 text-[11px] text-slate-300">{`{
+          <pre className="mt-2 max-h-56 overflow-auto rounded bg-slate-100 p-2 text-[11px] text-slate-700 dark:bg-slate-950 dark:text-slate-300">{`{
   "colorMapping": {
     "type": "categorical",
     "column": "class",
@@ -146,7 +146,7 @@ export function EmbeddingViewer() {
     }
   }
 }`}</pre>
-          <p className="mt-2 text-[11px] text-slate-400">
+          <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
             For categorical mappings, categories may also be provided as a color-to-label dictionary.
           </p>
         </div>

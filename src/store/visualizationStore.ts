@@ -2,15 +2,27 @@ import { create } from 'zustand'
 import type { AstronomicalObject } from '../utils/types'
 import type { EmbeddingViewState } from '../hooks/useViewState'
 
+type Theme = 'light' | 'dark'
+
 interface VisualizationState {
   selected: AstronomicalObject | null
   hovered: { object: AstronomicalObject; x: number; y: number } | null
   legendVisible: boolean
   viewState: EmbeddingViewState | null
+  theme: Theme
   setSelected: (obj: AstronomicalObject | null) => void
   setHovered: (payload: VisualizationState['hovered']) => void
   setLegendVisible: (visible: boolean) => void
   setViewState: (view: EmbeddingViewState) => void
+  setTheme: (theme: Theme) => void
+  toggleTheme: () => void
+}
+
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light'
+  const stored = localStorage.getItem('theme') as Theme | null
+  if (stored === 'light' || stored === 'dark') return stored
+  return 'light'
 }
 
 export const useVisualizationStore = create<VisualizationState>((set) => ({
@@ -18,8 +30,19 @@ export const useVisualizationStore = create<VisualizationState>((set) => ({
   hovered: null,
   legendVisible: true,
   viewState: null,
+  theme: getInitialTheme(),
   setSelected: (obj) => set({ selected: obj }),
   setHovered: (payload) => set({ hovered: payload }),
   setLegendVisible: (visible) => set({ legendVisible: visible }),
   setViewState: (viewState) => set({ viewState }),
+  setTheme: (theme) => {
+    localStorage.setItem('theme', theme)
+    set({ theme })
+  },
+  toggleTheme: () =>
+    set((state) => {
+      const next: Theme = state.theme === 'light' ? 'dark' : 'light'
+      localStorage.setItem('theme', next)
+      return { theme: next }
+    }),
 }))

@@ -31,8 +31,8 @@ export function Controls({
         onClick={onToggleLegend}
         icon={legendVisible ? '☰' : '☷'}
       />
-      <div className="flex items-center gap-2 rounded-md bg-slate-800/80 px-2 py-1.5 text-xs text-slate-100 shadow">
-        <label htmlFor="point-size" className="whitespace-nowrap font-medium text-slate-200">
+      <div className="flex items-center gap-2 rounded-md bg-white/80 px-2 py-1.5 text-xs text-slate-700 shadow dark:bg-slate-800/80 dark:text-slate-100">
+        <label htmlFor="point-size" className="whitespace-nowrap font-medium text-slate-600 dark:text-slate-200">
           Point size
         </label>
         <input
@@ -43,12 +43,12 @@ export function Controls({
           step={1}
           value={pointSize}
           onChange={(event) => onPointSizeChange(Number(event.target.value))}
-          className="w-24 accent-cyan-400"
+          className="w-24 accent-cyan-500 dark:accent-cyan-400"
           aria-label="Adjust point size"
         />
         <span className="w-6 text-center text-[11px]">{pointSize}</span>
         <button
-          className="rounded bg-slate-700 px-2 py-1 text-[11px] hover:bg-slate-600"
+          className="rounded bg-slate-200 px-2 py-1 text-[11px] hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
           onClick={onResetPointSize}
           title={`Reset to default (${defaultPointSize})`}
           aria-label={`Reset point size to default ${defaultPointSize}`}
@@ -71,7 +71,7 @@ function IconButton({
 }) {
   return (
     <button
-      className="rounded-md bg-slate-800/80 px-4 py-3 text-base text-white shadow hover:bg-slate-700 md:px-3 md:py-2 md:text-sm"
+      className="rounded-md bg-white/80 px-4 py-3 text-base text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-white dark:hover:bg-slate-700 md:px-3 md:py-2 md:text-sm"
       title={label}
       aria-label={label}
       onClick={onClick}

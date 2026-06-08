@@ -21,12 +21,12 @@ export function Legend({ visible, onClose, mapping, min, max, shapes, shapeLabel
   if (!showShapes && !showScale) return null
 
   return (
-    <div className="fixed right-4 top-4 z-30 w-64 max-w-[90vw] rounded-lg border border-slate-800 bg-slate-900/90 p-4 shadow-2xl backdrop-blur">
+    <div className="fixed right-4 top-4 z-30 w-64 max-w-[90vw] rounded-lg border border-slate-200 bg-white/90 p-4 shadow-2xl backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-sm font-semibold text-white">Legend</p>
+        <p className="text-sm font-semibold text-slate-900 dark:text-white">Legend</p>
         <button
           onClick={onClose}
-          className="rounded-md bg-slate-800 px-2 py-1 text-xs text-slate-100 hover:bg-slate-700"
+          className="rounded-md bg-slate-200 px-2 py-1 text-xs text-slate-700 hover:bg-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
         >
           Close
         </button>
