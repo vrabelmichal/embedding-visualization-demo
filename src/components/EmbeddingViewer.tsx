@@ -185,6 +185,7 @@ export function EmbeddingViewer() {
             data={objects}
             colorMapping={effectiveColorMapping}
             pointSize={pointSize}
+            selected={selected}
             viewState={viewState}
             onViewStateChange={onViewStateChange}
             onHover={setHovered}
