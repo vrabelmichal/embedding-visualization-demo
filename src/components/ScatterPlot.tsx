@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import DeckGL from '@deck.gl/react'
 import { IconLayer } from '@deck.gl/layers'
 import { COORDINATE_SYSTEM, OrthographicView } from '@deck.gl/core'
-import type { AstronomicalObject, ColorMapping, EmbeddingShape } from '../utils/types'
+import type { AstronomicalObject, ColorMapping } from '../utils/types'
 import { useShapeMapping } from '../hooks/useShapeMapping'
 import { useColorMapping } from '../hooks/useColorMapping'
 import type { EmbeddingViewState } from '../hooks/useViewState'
@@ -19,16 +19,16 @@ interface ScatterPlotProps {
   onClick: (object: AstronomicalObject | null) => void
 }
 
-const ALL_SHAPES: EmbeddingShape[] = [
+const ALL_SHAPES = [
   'star', 'triangle', 'square', 'pentagon', 'hexagon',
-  'polygon', 'diamond', 'circle', 'rectangle',
+  'polygon', 'diamond', 'circle', 'rectangle', 'ring',
 ]
 
 function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: number; width: number; height: number; anchorY?: number; mask?: boolean }> } {
   const size = 128
   const padding = 2
   const cols = 3
-  const allIcons = [...ALL_SHAPES, 'ring' as EmbeddingShape]
+  const allIcons = [...ALL_SHAPES]
   const atlasWidth = cols * (size + padding) + padding
   const rows = Math.ceil(allIcons.length / cols)
   const atlasHeight = rows * (size + padding) + padding
@@ -99,8 +99,8 @@ function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: 
   return { atlas: canvas.toDataURL('image/png'), mapping }
 }
 
-function getShapePoints(shape: EmbeddingShape): Array<[number, number]> {
-  const shapes: Record<EmbeddingShape, Array<[number, number]>> = {
+function getShapePoints(shape: string): Array<[number, number]> {
+  const shapes: Record<string, Array<[number, number]>> = {
     circle: [],
     rectangle: [[0, 0], [100, 0], [100, 100], [0, 100]],
     square: [[10, 10], [90, 10], [90, 90], [10, 90]],
@@ -124,7 +124,7 @@ export function ScatterPlot({
   onHover,
   onClick,
 }: ScatterPlotProps) {
-  const { getIconForShape } = useShapeMapping(data)
+  useShapeMapping(data)
   const { getColor } = useColorMapping(data, colorMapping)
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
