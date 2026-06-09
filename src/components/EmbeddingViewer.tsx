@@ -12,6 +12,7 @@ import type { AstronomicalObject, ColorMapping, VisualizationConfig, Visualizati
 import { loadCSV, loadCSVGzip, loadJSON } from '../utils/dataLoader'
 import { parseVisualizationConfigFile, fetchVisualizationConfigFromUrl } from '../utils/visualizationConfig'
 import { parseAndResolveUrls } from '../utils/urlResolver'
+import { UploadIcon, ConfigIcon } from './icons'
 
 const DEFAULT_POINT_SIZE = 18
 const DEFAULT_PREVIEW_SIZE = 160
@@ -186,25 +187,38 @@ export function EmbeddingViewer() {
           showDisplaySettings={showDisplaySettings}
           onToggleDisplaySettings={() => setShowDisplaySettings((v) => !v)}
         />
-        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
-          <span className="hidden md:inline">Upload</span>
-          <span className="md:hidden">⬆</span>
-          <input type="file" accept=".csv,.csv.gz,.json" className="hidden" onChange={onFileChange} />
-        </label>
-        <label className="flex cursor-pointer items-center gap-1 rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm">
-          <span className="hidden md:inline">Upload config</span>
-          <span className="md:hidden">Cfg</span>
-          <input type="file" accept=".json" className="hidden" onChange={onConfigFileChange} />
-        </label>
-        <button
-          type="button"
-          onClick={() => setShowConfigHelp((v) => !v)}
-          className="rounded-md bg-white/80 px-2 py-2 text-xs text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-100 dark:hover:bg-slate-700 md:text-sm"
-          aria-expanded={showConfigHelp}
-          aria-controls="config-format-help"
-        >
-          Config format
-        </button>
+        <div className="flex items-center gap-1">
+          <label
+            className="inline-flex items-center justify-center h-9 min-w-[2.25rem] cursor-pointer rounded-md bg-white/80 px-2 text-slate-600 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
+            title="Upload data file"
+          >
+            <span className="flex items-center gap-1">
+              <UploadIcon size={18} />
+              <span className="hidden md:inline text-xs font-medium">Upload</span>
+            </span>
+            <input type="file" accept=".csv,.csv.gz,.json" className="hidden" onChange={onFileChange} />
+          </label>
+          <label
+            className="inline-flex items-center justify-center h-9 min-w-[2.25rem] cursor-pointer rounded-md bg-white/80 px-2 text-slate-600 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
+            title="Upload config file"
+          >
+            <span className="flex items-center gap-1">
+              <ConfigIcon size={18} />
+              <span className="hidden md:inline text-xs font-medium">Config</span>
+            </span>
+            <input type="file" accept=".json" className="hidden" onChange={onConfigFileChange} />
+          </label>
+          <button
+            type="button"
+            onClick={() => setShowConfigHelp((v) => !v)}
+            className="inline-flex items-center justify-center h-9 rounded-md bg-white/80 px-2 text-xs font-medium text-slate-600 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
+            aria-expanded={showConfigHelp}
+            aria-controls="config-format-help"
+            title="Config format help"
+          >
+            Help
+          </button>
+        </div>
       </div>
 
       {showConfigHelp && (

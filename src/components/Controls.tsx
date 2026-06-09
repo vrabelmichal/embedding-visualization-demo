@@ -1,4 +1,5 @@
 import { useVisualizationStore } from '../store/visualizationStore'
+import { ZoomInIcon, ZoomOutIcon, ResetViewIcon, LegendIcon, DarkModeIcon, LightModeIcon, DisplayIcon, ChevronDownIcon } from './icons'
 
 interface ControlsProps {
   onZoomIn: () => void
@@ -40,34 +41,36 @@ export function Controls({
 
   return (
     <div className="relative">
-      <div className="flex flex-wrap items-center gap-1 md:gap-2">
-        <IconButton label="Zoom in" onClick={onZoomIn} icon="＋" />
-        <IconButton label="Zoom out" onClick={onZoomOut} icon="－" />
-        <IconButton label="Reset view" onClick={onReset} icon="⟳" />
-        <IconButton
-          label="Toggle legend"
-          onClick={onToggleLegend}
-          icon={legendVisible ? '☰' : '☷'}
-        />
-        <IconButton
+      <div className="flex items-center gap-1">
+        <ToolbarButton label="Zoom in" onClick={onZoomIn}>
+          <ZoomInIcon />
+        </ToolbarButton>
+        <ToolbarButton label="Zoom out" onClick={onZoomOut}>
+          <ZoomOutIcon />
+        </ToolbarButton>
+        <ToolbarButton label="Reset view" onClick={onReset}>
+          <ResetViewIcon />
+        </ToolbarButton>
+        <ToolbarButton label={legendVisible ? 'Hide legend' : 'Show legend'} onClick={onToggleLegend}>
+          <LegendIcon />
+        </ToolbarButton>
+        <ToolbarButton
           label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           onClick={toggleTheme}
-          icon={theme === 'light' ? '🌙' : '☀️'}
-        />
-        <button
-          type="button"
-          onClick={onToggleDisplaySettings}
-          className="relative rounded-md bg-white/80 px-2 py-2 text-xs font-medium text-slate-600 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-300 dark:hover:bg-slate-700"
-          title="Display settings"
-          aria-expanded={showDisplaySettings}
-          aria-label="Toggle display settings panel"
         >
-          <span className="hidden md:inline">Display</span>
-          <span className="md:hidden">⚙</span>
-          <span className={`ml-1 inline-block transition-transform ${showDisplaySettings ? 'rotate-180' : ''}`}>
-            ▾
-          </span>
-        </button>
+          {theme === 'light' ? <DarkModeIcon /> : <LightModeIcon />}
+        </ToolbarButton>
+        <ToolbarButton
+          label="Display settings"
+          onClick={onToggleDisplaySettings}
+          aria-expanded={showDisplaySettings}
+        >
+          <div className="flex items-center gap-1">
+            <DisplayIcon />
+            <span className="hidden md:inline text-xs font-medium">Display</span>
+            <ChevronDownIcon size={12} className={`hidden md:inline transition-transform ${showDisplaySettings ? 'rotate-180' : ''}`} />
+          </div>
+        </ToolbarButton>
       </div>
 
       {showDisplaySettings && (
@@ -114,23 +117,27 @@ export function Controls({
   )
 }
 
-function IconButton({
-  icon,
+function ToolbarButton({
   label,
   onClick,
+  children,
+  ...rest
 }: {
-  icon: string
   label: string
   onClick: () => void
+  children: React.ReactNode
+  [key: string]: unknown
 }) {
   return (
     <button
-      className="rounded-md bg-white/80 px-4 py-3 text-base text-slate-700 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-white dark:hover:bg-slate-700 md:px-3 md:py-2 md:text-sm"
+      type="button"
+      className="inline-flex items-center justify-center h-9 min-w-[2.25rem] rounded-md bg-white/80 px-2 text-slate-600 shadow hover:bg-slate-100 dark:bg-slate-800/80 dark:text-slate-200 dark:hover:bg-slate-700"
       title={label}
       aria-label={label}
       onClick={onClick}
+      {...rest}
     >
-      <span className="md:text-base">{icon}</span>
+      {children}
     </button>
   )
 }
@@ -144,12 +151,15 @@ function ResetButton({
 }) {
   return (
     <button
-      className="rounded bg-slate-200 px-1.5 py-0.5 text-[11px] hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
+      className="inline-flex items-center rounded bg-slate-200 px-1.5 py-0.5 text-[11px] hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600"
       onClick={onClick}
       title={label}
       aria-label={label}
     >
-      ↺
+      <svg width={10} height={10} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <polyline points="1 4 1 10 7 10" />
+        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+      </svg>
     </button>
   )
 }
