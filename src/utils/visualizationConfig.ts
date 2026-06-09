@@ -127,3 +127,12 @@ export async function parseVisualizationConfigFile(file: File): Promise<Visualiz
   const text = await file.text()
   return parseVisualizationConfigText(text)
 }
+
+export async function fetchVisualizationConfigFromUrl(url: string): Promise<VisualizationConfig> {
+  const response = await fetch(url)
+  if (!response.ok) {
+    throw new Error(`Failed to load config from ${url}: ${response.statusText}`)
+  }
+  const text = await response.text()
+  return parseVisualizationConfigText(text)
+}

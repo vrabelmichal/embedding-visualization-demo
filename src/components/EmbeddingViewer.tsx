@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { ScatterPlot } from './ScatterPlot'
 import { ImageTooltip } from './ImageTooltip'
 import { DetailPanel } from './DetailPanel'
@@ -8,17 +8,100 @@ import { LoadingState } from './LoadingState'
 import { useDataLoader } from '../hooks/useDataLoader'
 import { useViewState } from '../hooks/useViewState'
 import { useShapeMapping } from '../hooks/useShapeMapping'
-import type { AstronomicalObject, ColorMapping, VisualizationConfig } from '../utils/types'
-import { parseVisualizationConfigFile } from '../utils/visualizationConfig'
+import type { AstronomicalObject, ColorMapping, VisualizationConfig, VisualizationData } from '../utils/types'
+import { loadCSV, loadCSVGzip, loadJSON } from '../utils/dataLoader'
+import { parseVisualizationConfigFile, fetchVisualizationConfigFromUrl } from '../utils/visualizationConfig'
+import { parseAndResolveUrls } from '../utils/urlResolver'
 
 const DEFAULT_POINT_SIZE = 18
 const DEFAULT_PREVIEW_SIZE = 160
-const PREVIEW_SIZE_MIN = 64
-const PREVIEW_SIZE_MAX = 400
+
+interface QueryConfig {
+  embUrl: string
+  cfgUrl: string
+}
+
+function getQueryConfig(): QueryConfig | null {
+  try {
+    const resolved = parseAndResolveUrls()
+    return { embUrl: resolved.emb, cfgUrl: resolved.cfg }
+  } catch {
+    return null
+  }
+}
 
 export function EmbeddingViewer() {
-  const { data, loading, error, loadFromFile } = useDataLoader()
-  const objects = data?.objects ?? []
+  const queryConfig = useMemo(() => getQueryConfig(), [])
+  const {
+    data,
+    loading: dataLoading,
+    error: dataError,
+    loadFromFile,
+  } = useDataLoader(queryConfig ? null : undefined)
+
+  const [queryLoading, setQueryLoading] = useState(!!queryConfig)
+  const [queryError, setQueryError] = useState<string | null>(null)
+  const [queryData, setQueryData] = useState<VisualizationData | null>(null)
+
+  const [config, setConfig] = useState<VisualizationConfig | null>(null)
+  const [configError, setConfigError] = useState<string | null>(null)
+  const [showConfigHelp, setShowConfigHelp] = useState(false)
+
+  useEffect(() => {
+    if (!queryConfig) return
+
+    let cancelled = false
+
+    async function loadBoth() {
+      setQueryLoading(true)
+      setQueryError(null)
+      setQueryData(null)
+
+      try {
+        const [embeddingData, configData] = await Promise.all([
+          (async () => {
+            const url = queryConfig!.embUrl
+
+            if (url.endsWith('.csv.gz')) {
+              return loadCSVGzip(url)
+            }
+            if (url.endsWith('.csv')) {
+              return loadCSV(url)
+            }
+            return loadJSON(url)
+          })(),
+          fetchVisualizationConfigFromUrl(queryConfig!.cfgUrl),
+        ])
+
+        if (cancelled) return
+
+        setQueryData(embeddingData)
+        setConfig(configData)
+        setConfigError(null)
+      } catch (error) {
+        if (cancelled) return
+        const message = error instanceof Error ? error.message : 'Failed to load visualization data from URL parameters.'
+        setQueryError(message)
+        setQueryData(null)
+        setConfig(null)
+      } finally {
+        if (!cancelled) {
+          setQueryLoading(false)
+        }
+      }
+    }
+
+    loadBoth()
+
+    return () => {
+      cancelled = true
+    }
+  }, [queryConfig])
+
+  const effectiveData = queryData ?? data
+  const effectiveLoading = queryConfig ? queryLoading : dataLoading
+  const effectiveError = queryConfig ? queryError : dataError
+  const objects = effectiveData?.objects ?? []
 
   const { viewState, onViewStateChange, resetView, zoomIn, zoomOut } =
     useViewState(objects)
@@ -35,21 +118,18 @@ export function EmbeddingViewer() {
   const [pointSize, setPointSize] = useState(DEFAULT_POINT_SIZE)
   const [previewSize, setPreviewSize] = useState(DEFAULT_PREVIEW_SIZE)
   const [showDisplaySettings, setShowDisplaySettings] = useState(false)
-  const [config, setConfig] = useState<VisualizationConfig | null>(null)
-  const [configError, setConfigError] = useState<string | null>(null)
-  const [showConfigHelp, setShowConfigHelp] = useState(false)
 
   const effectiveColorMapping = useMemo<ColorMapping | undefined>(() => {
     if (!config?.colorMapping) {
-      return data?.colorMapping
+      return effectiveData?.colorMapping
     }
 
     return {
-      ...data?.colorMapping,
+      ...effectiveData?.colorMapping,
       ...config.colorMapping,
-      mode: config.colorMapping.mode ?? data?.colorMapping?.mode,
+      mode: config.colorMapping.mode ?? effectiveData?.colorMapping?.mode,
     }
-  }, [config?.colorMapping, data?.colorMapping])
+  }, [config?.colorMapping, effectiveData?.colorMapping])
 
   const stats = useMemo(() => {
     if (!objects.length || !effectiveColorMapping?.column || effectiveColorMapping.mode === 'categorical') {
@@ -163,14 +243,14 @@ export function EmbeddingViewer() {
         </div>
       )}
 
-      {loading && (
+      {effectiveLoading && (
         <div className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2">
           <LoadingState message="Loading data..." />
         </div>
       )}
-      {error && (
+      {effectiveError && (
         <div className="absolute left-4 top-16 z-30 max-w-xs rounded-md border border-red-500/60 bg-red-500/10 px-3 py-2 text-sm text-red-100">
-          {error}
+          {effectiveError}
         </div>
       )}
       {configError && (
@@ -180,7 +260,7 @@ export function EmbeddingViewer() {
       )}
 
       <div className="relative h-full w-full">
-        {!loading && objects.length > 0 && (
+        {!effectiveLoading && objects.length > 0 && (
           <ScatterPlot
             data={objects}
             colorMapping={effectiveColorMapping}
@@ -192,7 +272,7 @@ export function EmbeddingViewer() {
             onClick={(obj) => setSelected(obj)}
           />
         )}
-        {!loading && objects.length === 0 && (
+        {!effectiveLoading && objects.length === 0 && (
           <div className="flex h-full w-full items-center justify-center text-slate-400 dark:text-slate-500">
             <p className="text-lg">Upload a CSV or JSON file to visualize embeddings</p>
           </div>

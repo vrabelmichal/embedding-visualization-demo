@@ -4,13 +4,13 @@ import { loadCSV, loadCSVGzip, loadFile, loadJSON } from '../utils/dataLoader'
 
 const DEFAULT_URL = '/sample-data.json'
 
-export function useDataLoader(initialUrl = DEFAULT_URL) {
+export function useDataLoader(initialUrl: string | null = DEFAULT_URL) {
   const [state, setState] = useState<LoadedData>({
     data: null,
-    loading: true,
+    loading: !initialUrl ? false : true,
     error: null,
   })
-  const [url, setUrl] = useState(initialUrl)
+  const [url, setUrl] = useState<string | null>(initialUrl)
 
   const loadFromUrl = useCallback(async (target: string) => {
     setState({ data: null, loading: true, error: null })
@@ -45,7 +45,9 @@ export function useDataLoader(initialUrl = DEFAULT_URL) {
   }, [])
 
   useEffect(() => {
-    loadFromUrl(url)
+    if (url) {
+      loadFromUrl(url)
+    }
   }, [url, loadFromUrl])
 
   return {
@@ -54,6 +56,6 @@ export function useDataLoader(initialUrl = DEFAULT_URL) {
     error: state.error,
     setUrl,
     loadFromFile,
-    reload: () => loadFromUrl(url),
+    reload: () => url ? loadFromUrl(url) : undefined,
   }
 }
