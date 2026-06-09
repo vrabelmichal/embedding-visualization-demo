@@ -2,8 +2,10 @@ import Papa from 'papaparse'
 import type { AstronomicalObject, VisualizationData } from './types'
 import { validateShape } from './shapeRenderer'
 
+const FETCH_OPTIONS: RequestInit = { credentials: 'include' }
+
 export async function loadJSON(url: string): Promise<VisualizationData> {
-  const response = await fetch(url)
+  const response = await fetch(url, FETCH_OPTIONS)
   if (!response.ok) {
     throw new Error(`Failed to load ${url}: ${response.statusText}`)
   }
@@ -13,7 +15,7 @@ export async function loadJSON(url: string): Promise<VisualizationData> {
 }
 
 export async function loadCSV(url: string): Promise<VisualizationData> {
-  const response = await fetch(url)
+  const response = await fetch(url, FETCH_OPTIONS)
   if (!response.ok) {
     throw new Error(`Failed to load ${url}: ${response.statusText}`)
   }
@@ -22,7 +24,7 @@ export async function loadCSV(url: string): Promise<VisualizationData> {
 }
 
 export async function loadCSVGzip(url: string): Promise<VisualizationData> {
-  const response = await fetch(url)
+  const response = await fetch(url, FETCH_OPTIONS)
   if (!response.ok) {
     throw new Error(`Failed to load ${url}: ${response.statusText}`)
   }
