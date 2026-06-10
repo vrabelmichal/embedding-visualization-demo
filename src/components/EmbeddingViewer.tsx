@@ -12,6 +12,7 @@ import type { AstronomicalObject, ColorMapping, VisualizationConfig, Visualizati
 import { loadCSV, loadCSVGzip, loadJSON } from '../utils/dataLoader'
 import { parseVisualizationConfigFile, fetchVisualizationConfigFromUrl } from '../utils/visualizationConfig'
 import { parseAndResolveUrls } from '../utils/urlResolver'
+import { hasCompleteColorMapping as hasCompleteColorMappingFn } from '../utils/colorMapper'
 import { UploadIcon, ConfigIcon } from './icons'
 
 const DEFAULT_POINT_SIZE = 18
@@ -119,6 +120,7 @@ export function EmbeddingViewer() {
   const [pointSize, setPointSize] = useState(DEFAULT_POINT_SIZE)
   const [previewSize, setPreviewSize] = useState(DEFAULT_PREVIEW_SIZE)
   const [showDisplaySettings, setShowDisplaySettings] = useState(false)
+  const [useColorColumn, setUseColorColumn] = useState<boolean | null>(null)
 
   const effectiveColorMapping = useMemo<ColorMapping | undefined>(() => {
     if (!config?.colorMapping) {
@@ -131,6 +133,13 @@ export function EmbeddingViewer() {
       mode: config.colorMapping.mode ?? effectiveData?.colorMapping?.mode,
     }
   }, [config?.colorMapping, effectiveData?.colorMapping])
+
+  const hasCompleteColorMapping = useMemo(
+    () => hasCompleteColorMappingFn(effectiveColorMapping),
+    [effectiveColorMapping],
+  )
+
+  const effectiveUseColorColumn = useColorColumn ?? !hasCompleteColorMapping
 
   const stats = useMemo(() => {
     if (!objects.length || !effectiveColorMapping?.column || effectiveColorMapping.mode === 'categorical') {
@@ -186,6 +195,9 @@ export function EmbeddingViewer() {
           onResetPreviewSize={() => setPreviewSize(DEFAULT_PREVIEW_SIZE)}
           showDisplaySettings={showDisplaySettings}
           onToggleDisplaySettings={() => setShowDisplaySettings((v) => !v)}
+          useColorColumn={effectiveUseColorColumn}
+          onUseColorColumnChange={setUseColorColumn}
+          hasColorMapping={hasCompleteColorMapping}
         />
         <div className="flex items-center gap-1">
           <label
@@ -284,6 +296,7 @@ export function EmbeddingViewer() {
             onViewStateChange={onViewStateChange}
             onHover={setHovered}
             onClick={(obj) => setSelected(obj)}
+            useColorColumn={effectiveUseColorColumn}
           />
         )}
         {!effectiveLoading && objects.length === 0 && (

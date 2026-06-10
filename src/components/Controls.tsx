@@ -17,6 +17,9 @@ interface ControlsProps {
   onResetPreviewSize: () => void
   showDisplaySettings: boolean
   onToggleDisplaySettings: () => void
+  useColorColumn: boolean
+  onUseColorColumnChange: (use: boolean) => void
+  hasColorMapping: boolean
 }
 
 export function Controls({
@@ -35,6 +38,9 @@ export function Controls({
   onResetPreviewSize,
   showDisplaySettings,
   onToggleDisplaySettings,
+  useColorColumn,
+  onUseColorColumnChange,
+  hasColorMapping,
 }: ControlsProps) {
   const theme = useVisualizationStore((s) => s.theme)
   const toggleTheme = useVisualizationStore((s) => s.toggleTheme)
@@ -111,6 +117,19 @@ export function Controls({
             <span className="w-7 text-center">{previewSize}</span>
             <ResetButton onClick={onResetPreviewSize} label={`Default ${defaultPreviewSize}`} />
           </div>
+          {hasColorMapping && (
+            <div className="flex items-center gap-2 border-l-0 border-t border-slate-300 pt-2 dark:border-slate-600 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0">
+              <label className="flex items-center gap-2 cursor-pointer whitespace-nowrap font-medium text-slate-600 dark:text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={useColorColumn}
+                  onChange={(event) => onUseColorColumnChange(event.target.checked)}
+                  className="accent-cyan-500 dark:accent-cyan-400"
+                />
+                Use color column
+              </label>
+            </div>
+          )}
         </div>
       )}
     </div>

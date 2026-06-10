@@ -1,3 +1,4 @@
+import { color as parseColor } from 'd3-color'
 import { scaleLinear, scaleLog, scaleQuantile } from 'd3-scale'
 import type { AstronomicalObject, ColorMapping } from './types'
 
@@ -10,21 +11,16 @@ const SCHEMES: Record<string, string[]> = {
   blues: ['#f7fbff', '#c6dbef', '#6baed6', '#2171b5'],
 }
 
-function hexToRgba(hex: string, alpha = 1): [number, number, number, number] {
-  const normalized = hex.replace('#', '')
-  if (![3, 6].includes(normalized.length)) return DEFAULT_COLOR
-  const value =
-    normalized.length === 3
-      ? normalized
-          .split('')
-          .map((c) => c + c)
-          .join('')
-      : normalized
-  const num = parseInt(value, 16)
-  const r = (num >> 16) & 255
-  const g = (num >> 8) & 255
-  const b = num & 255
-  return [r, g, b, Math.round(alpha * 255)]
+function colorToRgba(input: string, alpha = 1): [number, number, number, number] {
+  const parsed = parseColor(input)
+  if (!parsed) return DEFAULT_COLOR
+
+  return [
+    Math.round(parsed.r),
+    Math.round(parsed.g),
+    Math.round(parsed.b),
+    Math.round(alpha * parsed.opacity * 255),
+  ]
 }
 
 export function getColorScale(
@@ -48,29 +44,47 @@ export function getColorScale(
   ) as any
 
   scale.domain(domain).range(scheme)
-  return (value: number) => hexToRgba(scale(value) as string, 0.9)
+  return (value: number) => colorToRgba(String(scale(value)), 0.9)
+}
+
+export function hasCompleteColorMapping(mapping?: ColorMapping): boolean {
+  if (!mapping) return false
+  if (mapping.mode === 'categorical') {
+    return Boolean(mapping.column && mapping.valueToColor)
+  }
+  return Boolean(mapping.column && mapping.scale && mapping.colorScheme)
 }
 
 export function colorForObject(
   obj: AstronomicalObject,
   colorScale: ((value: number) => [number, number, number, number]) | null,
   mapping?: ColorMapping,
+  useColorColumn = true,
 ): [number, number, number, number] {
-  if (obj.color && typeof obj.color === 'string') {
-    return hexToRgba(obj.color, 0.95)
-  }
+  // 1. If mapping is categorical, use the value-to-color mapping.
   if (mapping?.mode === 'categorical' && mapping.column && mapping.valueToColor) {
     const value = String(obj[mapping.column] ?? '').trim()
     const color = mapping.valueToColor[value]
     if (color) {
-      return hexToRgba(color, 0.92)
+      return colorToRgba(color, 0.92)
     }
   }
-  if (colorScale && mapping?.column) {
+  // 2. If mapping is continuous and we have a color scale, compute the color.
+  if (colorScale && mapping?.column && mapping.mode !== 'categorical') {
     const value = Number(obj[mapping.column])
     if (Number.isFinite(value)) {
       return colorScale(value)
     }
+  }
+
+  // 3. Fall back to the raw color column only when explicitly enabled.
+  if (useColorColumn && obj.color && typeof obj.color === 'string') {
+    return colorToRgba(obj.color, 0.95)
+  }
+
+  // 4. Otherwise use the default rendering color.
+  if (obj.color && typeof obj.color === 'string') {
+    return DEFAULT_COLOR
   }
   return DEFAULT_COLOR
 }

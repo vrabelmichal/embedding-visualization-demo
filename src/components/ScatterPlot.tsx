@@ -17,6 +17,7 @@ interface ScatterPlotProps {
   onViewStateChange: (params: any) => void
   onHover: (info: { object: AstronomicalObject; x: number; y: number } | null) => void
   onClick: (object: AstronomicalObject | null) => void
+  useColorColumn: boolean
 }
 
 const ALL_SHAPES = [
@@ -123,9 +124,10 @@ export function ScatterPlot({
   onViewStateChange,
   onHover,
   onClick,
+  useColorColumn,
 }: ScatterPlotProps) {
   useShapeMapping(data)
-  const { getColor } = useColorMapping(data, colorMapping)
+  const { getColor } = useColorMapping(data, colorMapping, useColorColumn)
   const [mounted, setMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -158,6 +160,7 @@ export function ScatterPlot({
         sizeMinPixels: 4,
         sizeMaxPixels: 64,
         updateTriggers: {
+          getColor: [colorMapping, useColorColumn],
           getSize: pointSize,
         },
         parameters: { depthTest: false },
