@@ -61,7 +61,12 @@ export function colorForObject(
   mapping?: ColorMapping,
   useColorColumn = true,
 ): [number, number, number, number] {
-  // 1. If mapping is categorical, use the value-to-color mapping.
+  // 1. If the CSV color column is enabled and present, use it first.
+  if (useColorColumn && obj.color && typeof obj.color === 'string') {
+    return colorToRgba(obj.color, 0.95)
+  }
+
+  // 2. If mapping is categorical, use the value-to-color mapping.
   if (mapping?.mode === 'categorical' && mapping.column && mapping.valueToColor) {
     const value = String(obj[mapping.column] ?? '').trim()
     const color = mapping.valueToColor[value]
@@ -69,7 +74,7 @@ export function colorForObject(
       return colorToRgba(color, 0.92)
     }
   }
-  // 2. If mapping is continuous and we have a color scale, compute the color.
+  // 3. If mapping is continuous and we have a color scale, compute the color.
   if (colorScale && mapping?.column && mapping.mode !== 'categorical') {
     const value = Number(obj[mapping.column])
     if (Number.isFinite(value)) {
@@ -77,15 +82,7 @@ export function colorForObject(
     }
   }
 
-  // 3. Fall back to the raw color column only when explicitly enabled.
-  if (useColorColumn && obj.color && typeof obj.color === 'string') {
-    return colorToRgba(obj.color, 0.95)
-  }
-
   // 4. Otherwise use the default rendering color.
-  if (obj.color && typeof obj.color === 'string') {
-    return DEFAULT_COLOR
-  }
   return DEFAULT_COLOR
 }
 
