@@ -8,6 +8,9 @@ export type EmbeddingShape =
   | 'diamond'
   | 'circle'
   | 'rectangle'
+  | 'cross'
+  | 'x'
+  | 'plus'
 
 export interface AstronomicalObject {
   coadd_object_id: string

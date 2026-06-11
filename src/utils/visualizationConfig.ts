@@ -12,6 +12,9 @@ const VALID_SHAPES: EmbeddingShape[] = [
   'diamond',
   'circle',
   'rectangle',
+  'cross',
+  'x',
+  'plus',
 ]
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {

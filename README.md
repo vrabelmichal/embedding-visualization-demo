@@ -116,7 +116,7 @@ If your CSV or JSON data already has an `embedding_shape` column (one of the val
 
 > **What this does:** The data already tells each point "be a star" or "be a circle". This config only changes the legend text — `"star"` displays as "class_0: Disturbed Galaxies" and `"circle"` displays as "Other".
 
-Valid shapes: `star`, `triangle`, `square`, `pentagon`, `hexagon`, `polygon`, `diamond`, `circle`, `rectangle`.
+Valid shapes: `star`, `triangle`, `square`, `pentagon`, `hexagon`, `polygon`, `diamond`, `circle`, `rectangle`, `cross`, `x`, `plus`.
 
 #### Approach B: No `embedding_shape` column — determine shapes from another column
 

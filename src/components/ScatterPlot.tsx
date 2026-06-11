@@ -23,7 +23,7 @@ interface ScatterPlotProps {
 
 const ALL_SHAPES = [
   'star', 'triangle', 'square', 'pentagon', 'hexagon',
-  'polygon', 'diamond', 'circle', 'rectangle', 'ring',
+  'polygon', 'diamond', 'circle', 'rectangle', 'cross', 'x', 'plus', 'ring',
 ]
 
 function buildAtlas(): { atlas: string; mapping: Record<string, { x: number; y: number; width: number; height: number; anchorY?: number; mask?: boolean }> } {
@@ -112,6 +112,9 @@ function getShapePoints(shape: string): Array<[number, number]> {
     pentagon: [[50, 0], [95, 35], [77, 100], [23, 100], [5, 35]],
     polygon: [[50, 0], [90, 20], [100, 60], [70, 100], [30, 100], [0, 60], [10, 20]],
     star: [[50, 0], [61, 35], [98, 35], [68, 57], [79, 91], [50, 70], [21, 91], [32, 57], [2, 35], [39, 35]],
+    cross: [[35, 0], [65, 0], [65, 35], [100, 35], [100, 55], [65, 55], [65, 100], [35, 100], [35, 55], [0, 55], [0, 35], [35, 35]],
+    x: [[0, 0], [30, 0], [50, 20], [70, 0], [100, 0], [80, 30], [100, 50], [80, 70], [100, 100], [70, 100], [50, 80], [30, 100], [0, 100], [20, 70], [0, 50], [20, 30]],
+    plus: [[30, 0], [70, 0], [70, 30], [100, 30], [100, 70], [70, 70], [70, 100], [30, 100], [30, 70], [0, 70], [0, 30], [30, 30]],
   }
   return shapes[shape] ?? shapes.rectangle
 }
