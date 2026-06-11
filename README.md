@@ -23,21 +23,62 @@ npm run build
 
 ## Visualization Config Upload
 
-Use Upload config in the toolbar to apply optional visualization overrides from a JSON file.
+Use **Upload config** in the toolbar to apply optional visualization overrides from a JSON file.
 
-Supported overrides:
+The config file supports three sections: `shapeLabels`, `shapeMapping`, and `colorMapping`.
 
-- shapeLabels: custom display labels for shapes in the legend.
-- colorMapping: choose continuous or categorical behavior.
+---
 
-Example continuous mapping:
+### `shapeLabels` — Legend display labels for shapes
+
+Map shape names to human-readable labels shown in the legend.
 
 ```json
 {
   "shapeLabels": {
-    "star": "Candidate",
-    "circle": "Confirmed"
-  },
+    "star": "Positive Class",
+    "circle": "Negative Class"
+  }
+}
+```
+
+Valid shapes: `star`, `triangle`, `square`, `pentagon`, `hexagon`, `polygon`, `diamond`, `circle`, `rectangle`.
+
+Shapes are determined by the `embedding_shape` column in the data when no `shapeMapping` is configured.
+
+---
+
+### `shapeMapping` — Derive shapes from a column value
+
+Assign shapes dynamically based on values in a dataset column. Use `defaultShape` as a sibling field (not inside `categories`) to provide a fallback shape.
+
+```json
+{
+  "shapeMapping": {
+    "column": "predicted_class_display",
+    "categories": {
+      "class_0: Disturbed Galaxies": "star"
+    },
+    "defaultShape": "circle"
+  }
+}
+```
+
+- `column` — the dataset column whose values determine shapes.
+- `categories` — maps column values to shapes.
+- `defaultShape` — fallback shape for all unmatched values. Set alongside `categories`, not inside it.
+- When a `shapeMapping` is present, it overrides the `embedding_shape` column.
+
+---
+
+### `colorMapping` — Color points by column value
+
+Two modes: **continuous** and **categorical**.
+
+#### Continuous mapping
+
+```json
+{
   "colorMapping": {
     "type": "continuous",
     "column": "magnitude",
@@ -49,22 +90,28 @@ Example continuous mapping:
 }
 ```
 
-Example categorical mapping:
+- `scale`: `linear`, `log`, or `quantile`.
+- `colorScheme`: `viridis`, `plasma`, `turbo`, or `blues`.
+- `min` / `max`: optional explicit domain (defaults to data range).
+
+#### Categorical mapping
+
+Maps specific column values to specific colors. Use `defaultColor` as a sibling field (not inside `categories`) to provide a fallback color.
 
 ```json
 {
   "colorMapping": {
     "type": "categorical",
-    "column": "class",
+    "column": "predicted_class_display",
     "categories": {
-      "spiral": "#f97316",
-      "elliptical": "#0ea5e9"
-    }
+      "class_0: Disturbed Galaxies": "#0f4c5c"
+    },
+    "defaultColor": "#f4f4f9"
   }
 }
 ```
 
-Categorical categories also accept a color-to-label dictionary:
+Categories also support a color-to-label format:
 
 ```json
 {
@@ -79,11 +126,47 @@ Categorical categories also accept a color-to-label dictionary:
 }
 ```
 
-Notes:
+- `defaultColor` provides a fallback color for unmatched column values. It is not shown in the legend.
+- The `"Use color column"` checkbox in the Display settings toggles whether the dataset's `color` column takes priority over the config's `colorMapping`.
 
-- For continuous mapping, scale supports linear, log, and quantile.
-- For categorical mapping, the selected column value is matched against category keys or labels.
-- A sample file is available at public/visualization-config.example.json.
+---
+
+### Color priority
+
+When the "Use color column" checkbox is unchecked (default when a config provides a complete mapping):
+
+1. Dataset `color` column — **ignored**
+2. Config `colorMapping` with explicit value match — **applied**
+3. Config `colorMapping` with `defaultColor` — **applied as fallback**
+4. Hardcoded default color (`#4299e1`) — **last resort**
+
+When the "Use color column" checkbox is checked:
+
+1. Dataset `color` column — **applied first**
+2. Config `colorMapping` — **fallback**
+
+---
+
+### Full example (using default values)
+
+```json
+{
+  "shapeLabels": {
+    "star": "class_0: Disturbed Galaxies",
+    "circle": "Other"
+  },
+  "colorMapping": {
+    "type": "categorical",
+    "column": "predicted_class_display",
+    "categories": {
+      "class_0: Disturbed Galaxies": "#0f4c5c"
+    },
+    "defaultColor": "#f4f4f9"
+  }
+}
+```
+
+A sample file is available at `public/visualization-config.example.json`.
 
 ## Point Size Control
 

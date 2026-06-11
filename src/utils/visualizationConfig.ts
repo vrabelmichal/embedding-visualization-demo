@@ -1,4 +1,4 @@
-import type { ColorMapping, EmbeddingShape, VisualizationConfig } from './types'
+import type { ColorMapping, EmbeddingShape, ShapeMapping, VisualizationConfig } from './types'
 
 const VALID_SCALES = new Set(['linear', 'log', 'quantile'])
 const HEX_COLOR_PATTERN = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
@@ -33,6 +33,40 @@ function normalizeShapeLabels(input: unknown): VisualizationConfig['shapeLabels'
   if (!entries.length) return undefined
 
   return Object.fromEntries(entries) as VisualizationConfig['shapeLabels']
+}
+
+function normalizeShapeMapping(input: unknown): ShapeMapping | undefined {
+  if (!isPlainObject(input)) return undefined
+
+  const column = typeof input.column === 'string' ? input.column : undefined
+  if (!column) return undefined
+
+  const rawCategories = input.categories ?? input.valueToShape
+  if (!isPlainObject(rawCategories)) return undefined
+
+  const valueToShape: Record<string, EmbeddingShape> = {}
+
+  Object.entries(rawCategories).forEach(([key, value]) => {
+    if (typeof value !== 'string') return
+    const trimmedValue = value.trim() as EmbeddingShape
+    if (VALID_SHAPES.includes(trimmedValue)) {
+      valueToShape[key.trim()] = trimmedValue
+    }
+  })
+
+  if (!Object.keys(valueToShape).length) return undefined
+
+  const rawDefault = input.defaultShape ?? input.default_shape
+  const defaultShape =
+    typeof rawDefault === 'string' && VALID_SHAPES.includes(rawDefault.trim() as EmbeddingShape)
+      ? (rawDefault.trim() as EmbeddingShape)
+      : undefined
+
+  return {
+    column,
+    valueToShape,
+    defaultShape,
+  }
 }
 
 function normalizeCategoricalMap(
@@ -85,12 +119,22 @@ function normalizeColorMapping(input: unknown): ColorMapping | undefined {
       input.categories ?? input.valueToColor ?? input.colorToLabel,
     )
 
+    const rawDefaultColor =
+      typeof input.defaultColor === 'string'
+        ? input.defaultColor.trim()
+        : typeof input.default_color === 'string'
+          ? input.default_color.trim()
+          : undefined
+    const defaultColor =
+      rawDefaultColor && HEX_COLOR_PATTERN.test(rawDefaultColor) ? rawDefaultColor : undefined
+
     return {
       mode: 'categorical',
       scale: 'categorical',
       column,
       valueToColor: categories.valueToColor,
       colorToLabel: categories.colorToLabel,
+      defaultColor,
     }
   }
 
@@ -119,6 +163,7 @@ export function parseVisualizationConfigText(text: string): VisualizationConfig 
 
   return {
     shapeLabels: normalizeShapeLabels(parsed.shapeLabels),
+    shapeMapping: normalizeShapeMapping(parsed.shapeMapping),
     colorMapping: normalizeColorMapping(parsed.colorMapping),
   }
 }

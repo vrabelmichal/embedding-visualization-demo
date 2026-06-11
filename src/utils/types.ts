@@ -27,10 +27,18 @@ export interface ColorMapping {
   domain?: [number, number]
   valueToColor?: Record<string, string>
   colorToLabel?: Record<string, string>
+  defaultColor?: string
+}
+
+export interface ShapeMapping {
+  column?: string
+  valueToShape?: Record<string, EmbeddingShape>
+  defaultShape?: EmbeddingShape
 }
 
 export interface VisualizationConfig {
   shapeLabels?: Partial<Record<EmbeddingShape, string>>
+  shapeMapping?: ShapeMapping
   colorMapping?: ColorMapping
 }
 

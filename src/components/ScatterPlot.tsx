@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import DeckGL from '@deck.gl/react'
 import { IconLayer } from '@deck.gl/layers'
 import { COORDINATE_SYSTEM, OrthographicView } from '@deck.gl/core'
-import type { AstronomicalObject, ColorMapping } from '../utils/types'
+import type { AstronomicalObject, ColorMapping, ShapeMapping } from '../utils/types'
 import { useShapeMapping } from '../hooks/useShapeMapping'
 import { useColorMapping } from '../hooks/useColorMapping'
 import type { EmbeddingViewState } from '../hooks/useViewState'
@@ -11,6 +11,7 @@ import { validateShape } from '../utils/shapeRenderer'
 interface ScatterPlotProps {
   data: AstronomicalObject[]
   colorMapping?: ColorMapping
+  shapeMapping?: ShapeMapping
   pointSize: number
   selected: AstronomicalObject | null
   viewState: EmbeddingViewState
@@ -118,6 +119,7 @@ function getShapePoints(shape: string): Array<[number, number]> {
 export function ScatterPlot({
   data,
   colorMapping,
+  shapeMapping,
   pointSize,
   selected,
   viewState,
@@ -132,6 +134,18 @@ export function ScatterPlot({
   const containerRef = useRef<HTMLDivElement>(null)
 
   const { atlas, mapping } = useMemo(() => buildAtlas(), [])
+
+  const getIcon = useMemo(() => {
+    if (shapeMapping?.column && shapeMapping.valueToShape) {
+      return (d: AstronomicalObject) => {
+        const value = String(d[shapeMapping.column!] ?? '').trim()
+        const shape = shapeMapping.valueToShape![value] ?? shapeMapping.defaultShape
+        if (shape && shape in mapping) return shape
+        return validateShape(d.embedding_shape)
+      }
+    }
+    return (d: AstronomicalObject) => validateShape(d.embedding_shape)
+  }, [shapeMapping, mapping])
 
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
@@ -148,10 +162,7 @@ export function ScatterPlot({
         pickable: true,
         iconAtlas: atlas,
         iconMapping: mapping,
-        getIcon: (d: AstronomicalObject) => {
-          const shape = validateShape(d.embedding_shape)
-          return shape in mapping ? shape : 'rectangle'
-        },
+        getIcon,
         getPosition: (d: AstronomicalObject) => [d.embedding_x, d.embedding_y, 0],
         getColor: (d: AstronomicalObject) => getColor(d),
         getSize: pointSize,
@@ -161,6 +172,7 @@ export function ScatterPlot({
         sizeMaxPixels: 64,
         updateTriggers: {
           getColor: [colorMapping, useColorColumn],
+          getIcon: [shapeMapping],
           getSize: pointSize,
         },
         parameters: { depthTest: false },
@@ -169,7 +181,7 @@ export function ScatterPlot({
           onHover(object ? ({ object, x, y } as any) : null),
         onClick: ({ object }) => onClick((object ?? null) as any),
       }),
-    [data, getColor, onClick, onHover, pointSize, atlas, mapping],
+    [data, getColor, getIcon, onClick, onHover, pointSize, atlas, mapping],
   )
 
   const highlightLayer = useMemo(() => {

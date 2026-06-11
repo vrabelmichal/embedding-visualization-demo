@@ -139,12 +139,7 @@ export function EmbeddingViewer() {
     [effectiveColorMapping],
   )
 
-  const hasDataColorColumn = useMemo(
-    () => objects.some((obj) => typeof obj.color === 'string' && obj.color.trim()),
-    [objects],
-  )
-
-  const effectiveUseColorColumn = useColorColumn ?? hasDataColorColumn
+  const effectiveUseColorColumn = useColorColumn ?? !hasCompleteColorMapping
 
   const stats = useMemo(() => {
     if (!objects.length || !effectiveColorMapping?.column || effectiveColorMapping.mode === 'categorical') {
@@ -202,7 +197,7 @@ export function EmbeddingViewer() {
           onToggleDisplaySettings={() => setShowDisplaySettings((v) => !v)}
           useColorColumn={effectiveUseColorColumn}
           onUseColorColumnChange={setUseColorColumn}
-          hasColorMapping={hasCompleteColorMapping || hasDataColorColumn}
+          hasColorMapping={hasCompleteColorMapping}
         />
         <div className="flex items-center gap-1">
           <label
@@ -265,12 +260,25 @@ export function EmbeddingViewer() {
     "categories": {
       "spiral": "#f97316",
       "elliptical": "#0ea5e9"
-    }
+    },
+    "defaultColor": "#f4f4f9"
   }
 }`}</pre>
           <p className="mt-2 text-[11px] text-slate-500 dark:text-slate-400">
-            For categorical mappings, categories may also be provided as a color-to-label dictionary.
+            Use <code className="rounded bg-slate-200 px-1 dark:bg-slate-800">defaultColor</code> for
+            a fallback color and <code className="rounded bg-slate-200 px-1 dark:bg-slate-800">defaultShape</code> for
+            a fallback shape. Both are sibling fields of <code className="rounded bg-slate-200 px-1 dark:bg-slate-800">categories</code>,
+            not inside it.
           </p>
+          <pre className="mt-2 max-h-56 overflow-auto rounded bg-slate-100 p-2 text-[11px] text-slate-700 dark:bg-slate-950 dark:text-slate-300">{`{
+  "shapeMapping": {
+    "column": "predicted_class_display",
+    "categories": {
+      "class_0: Disturbed Galaxies": "star"
+    },
+    "defaultShape": "circle"
+  }
+}`}</pre>
         </div>
       )}
 
@@ -295,6 +303,7 @@ export function EmbeddingViewer() {
           <ScatterPlot
             data={objects}
             colorMapping={effectiveColorMapping}
+            shapeMapping={config?.shapeMapping}
             pointSize={pointSize}
             selected={selected}
             viewState={viewState}
@@ -319,6 +328,7 @@ export function EmbeddingViewer() {
         max={stats.max}
         shapes={uniqueShapes}
         shapeLabels={config?.shapeLabels}
+        shapeMapping={config?.shapeMapping}
       />
 
       <ImageTooltip hovered={hovered} size={previewSize} />

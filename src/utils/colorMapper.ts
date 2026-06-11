@@ -73,6 +73,9 @@ export function colorForObject(
     if (color) {
       return colorToRgba(color, 0.92)
     }
+    if (mapping.defaultColor) {
+      return colorToRgba(mapping.defaultColor, 0.92)
+    }
   }
   // 3. If mapping is continuous and we have a color scale, compute the color.
   if (colorScale && mapping?.column && mapping.mode !== 'categorical') {
