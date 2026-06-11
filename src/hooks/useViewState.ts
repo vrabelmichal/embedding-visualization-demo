@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { ViewStateChangeParameters } from '@deck.gl/core'
 import type { AstronomicalObject } from '../utils/types'
 
@@ -7,6 +7,19 @@ export interface EmbeddingViewState {
   zoom: number
   minZoom: number
   maxZoom: number
+}
+
+function targetsEqual(a: [number, number, number], b: [number, number, number]): boolean {
+  return a[0] === b[0] && a[1] === b[1] && a[2] === b[2]
+}
+
+function viewsEqual(a: EmbeddingViewState, b: EmbeddingViewState): boolean {
+  return (
+    a.zoom === b.zoom &&
+    a.minZoom === b.minZoom &&
+    a.maxZoom === b.maxZoom &&
+    targetsEqual(a.target, b.target)
+  )
 }
 
 function computeInitialView(objects: AstronomicalObject[]): EmbeddingViewState {
@@ -31,26 +44,56 @@ function computeInitialView(objects: AstronomicalObject[]): EmbeddingViewState {
   }
 }
 
-export function useViewState(objects: AstronomicalObject[]) {
-  const initial = useMemo(() => computeInitialView(objects), [objects])
-  const [viewState, setViewState] = useState<EmbeddingViewState>(initial)
+function extractTarget(value: unknown): [number, number, number] {
+  if (Array.isArray(value)) {
+    return [Number(value[0]) || 0, Number(value[1]) || 0, Number(value[2]) || 0]
+  }
+  if (value && typeof value === 'object' && '0' in value) {
+    const arr = value as Record<number, number>
+    return [Number(arr[0]) || 0, Number(arr[1]) || 0, Number(arr[2]) || 0]
+  }
+  return [0, 0, 0]
+}
 
-  // Reset view when dataset changes
+export function useViewState(objects: AstronomicalObject[]) {
+  const [viewState, setViewState] = useState<EmbeddingViewState>(() =>
+    computeInitialView(objects),
+  )
+
+  const objectsRef = useRef(objects)
   useEffect(() => {
-    setViewState(initial)
-  }, [initial])
+    objectsRef.current = objects
+  }, [objects])
+
+  useEffect(() => {
+    const initialView = computeInitialView(objects)
+    setViewState((prev) => (viewsEqual(prev, initialView) ? prev : initialView))
+  }, [objects])
 
   const onViewStateChange = useCallback(
     ({ viewState: next }: ViewStateChangeParameters<EmbeddingViewState>) => {
-      setViewState((prev) => ({
-        ...prev,
-        ...next,
-      }))
+      const nextTarget = extractTarget(next.target)
+      const parsedZoom = Number(next.zoom)
+      setViewState((prev) => {
+        const nextZoom = Number.isFinite(parsedZoom) ? parsedZoom : prev.zoom
+        if (prev.zoom === nextZoom && targetsEqual(prev.target, nextTarget)) {
+          return prev
+        }
+        return {
+          zoom: nextZoom,
+          target: nextTarget,
+          minZoom: prev.minZoom,
+          maxZoom: prev.maxZoom,
+        }
+      })
     },
     [],
   )
 
-  const resetView = useCallback(() => setViewState(initial), [initial])
+  const resetView = useCallback(() => {
+    setViewState(computeInitialView(objectsRef.current))
+  }, [])
+
   const zoomIn = useCallback(
     () => setViewState((v) => ({ ...v, zoom: Math.min(v.zoom + 1, v.maxZoom) })),
     [],

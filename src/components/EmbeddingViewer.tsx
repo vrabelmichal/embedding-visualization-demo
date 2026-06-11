@@ -139,7 +139,12 @@ export function EmbeddingViewer() {
     [effectiveColorMapping],
   )
 
-  const effectiveUseColorColumn = useColorColumn ?? !hasCompleteColorMapping
+  const hasDataColorColumn = useMemo(
+    () => objects.some((obj) => typeof obj.color === 'string' && obj.color.trim()),
+    [objects],
+  )
+
+  const effectiveUseColorColumn = useColorColumn ?? hasDataColorColumn
 
   const stats = useMemo(() => {
     if (!objects.length || !effectiveColorMapping?.column || effectiveColorMapping.mode === 'categorical') {
@@ -197,7 +202,7 @@ export function EmbeddingViewer() {
           onToggleDisplaySettings={() => setShowDisplaySettings((v) => !v)}
           useColorColumn={effectiveUseColorColumn}
           onUseColorColumnChange={setUseColorColumn}
-          hasColorMapping={hasCompleteColorMapping}
+          hasColorMapping={hasCompleteColorMapping || hasDataColorColumn}
         />
         <div className="flex items-center gap-1">
           <label
