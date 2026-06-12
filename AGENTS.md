@@ -518,9 +518,10 @@ console.log(`Operation took ${performance.now() - start}ms`);
 3. Review existing similar components
 4. Implement with TypeScript + Tailwind
 5. Run `npm run lint` to verify no lint issues
-6. Fix any lint-related problems before proceeding
-7. Test on desktop and mobile
-8. Update this AGENTS.md if needed
+6. Run `npm run typecheck` to verify no TypeScript type errors
+7. Fix any lint or type errors before proceeding
+8. Test on desktop and mobile
+9. Update this AGENTS.md if needed
 
 ### When Debugging:
 1. Check browser console for errors
@@ -590,5 +591,6 @@ Before submitting code, verify:
 - [ ] Follows naming conventions
 - [ ] Types imported from utils/types.ts
 - [ ] `npm run lint` passes with no new issues
+- [ ] `npm run typecheck` passes with no new errors
 
 **Ready to build! 🚀**
