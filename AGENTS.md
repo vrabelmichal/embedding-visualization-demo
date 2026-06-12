@@ -517,8 +517,10 @@ console.log(`Operation took ${performance.now() - start}ms`);
 2. Check `utils/types.ts` for data structures
 3. Review existing similar components
 4. Implement with TypeScript + Tailwind
-5. Test on desktop and mobile
-6. Update this AGENTS.md if needed
+5. Run `npm run lint` to verify no lint issues
+6. Fix any lint-related problems before proceeding
+7. Test on desktop and mobile
+8. Update this AGENTS.md if needed
 
 ### When Debugging:
 1. Check browser console for errors
@@ -569,7 +571,7 @@ If you find this guide incomplete:
 ---
 
 **Version:** 1.0  
-**Last Updated:** 2026-01-13  
+**Last Updated:** 2026-06-12  
 **Maintained By:** Project team
 
 ---
@@ -587,5 +589,6 @@ Before submitting code, verify:
 - [ ] Follows project structure
 - [ ] Follows naming conventions
 - [ ] Types imported from utils/types.ts
+- [ ] `npm run lint` passes with no new issues
 
 **Ready to build! 🚀**
