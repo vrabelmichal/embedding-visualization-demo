@@ -18,7 +18,7 @@ export function ShapeLegend({ shapes, labels, shapeMapping }: ShapeLegendProps) 
           {entries.map(([label, shape]) => (
             <div key={label} className="flex items-center gap-2">
               <span
-                className="h-5 w-5 bg-indigo-400"
+                className="h-5 w-5 shrink-0 bg-indigo-400"
                 style={{ clipPath: getShapeClipPath(shape) }}
               />
               <span>{labels?.[shape] ?? label}</span>
@@ -37,10 +37,10 @@ export function ShapeLegend({ shapes, labels, shapeMapping }: ShapeLegendProps) 
         {shapes.map((shape) => (
           <div key={shape} className="flex items-center gap-2">
             <span
-              className="h-5 w-5 bg-indigo-400"
-              style={{ clipPath: getShapeClipPath(shape) }}
-            />
-            <span className="capitalize">{labels?.[shape] ?? shape}</span>
+                className="h-5 w-5 shrink-0 bg-indigo-400"
+                style={{ clipPath: getShapeClipPath(shape) }}
+              />
+              <span className="capitalize">{labels?.[shape] ?? shape}</span>
           </div>
         ))}
       </div>
