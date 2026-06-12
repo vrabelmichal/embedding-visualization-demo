@@ -1,5 +1,6 @@
 import { color as parseColor } from 'd3-color'
 import { scaleLinear, scaleLog, scaleQuantile } from 'd3-scale'
+import type { ScaleContinuousNumeric } from 'd3-scale'
 import type { AstronomicalObject, ColorMapping } from './types'
 
 const DEFAULT_COLOR = [66, 153, 225, 200] as [number, number, number, number]
@@ -37,11 +38,11 @@ export function getColorScale(
 
   const scale = (
     mapping.scale === 'log'
-      ? scaleLog()
+      ? scaleLog<number, string>()
       : mapping.scale === 'quantile'
-        ? scaleQuantile()
-        : scaleLinear()
-  ) as any
+        ? scaleQuantile<number, string>()
+        : scaleLinear<number, string>()
+  ) as ScaleContinuousNumeric<number, string>
 
   scale.domain(domain).range(scheme)
   return (value: number) => colorToRgba(String(scale(value)), 0.9)

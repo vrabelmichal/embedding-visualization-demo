@@ -1,4 +1,4 @@
-import { getShapeClipPath } from '../utils/shapeRenderer'
+import { getShapeClipPath, validateShape } from '../utils/shapeRenderer'
 import type { AstronomicalObject } from '../utils/types'
 
 interface ImageTooltipProps {
@@ -9,7 +9,7 @@ interface ImageTooltipProps {
 export function ImageTooltip({ hovered, size }: ImageTooltipProps) {
   if (!hovered || !hovered.object.image_url) return null
   const { object, x, y } = hovered
-  const clipPath = getShapeClipPath((object.embedding_shape as any) || 'rectangle')
+  const clipPath = getShapeClipPath(validateShape(object.embedding_shape))
 
   return (
     <img

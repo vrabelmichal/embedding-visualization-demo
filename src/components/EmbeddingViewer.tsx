@@ -103,7 +103,7 @@ export function EmbeddingViewer() {
   const effectiveData = queryData ?? data
   const effectiveLoading = queryConfig ? queryLoading : dataLoading
   const effectiveError = queryConfig ? queryError : dataError
-  const objects = effectiveData?.objects ?? []
+  const objects = useMemo(() => effectiveData?.objects ?? [], [effectiveData?.objects])
 
   const { viewState, onViewStateChange, resetView, zoomIn, zoomOut } =
     useViewState(objects)

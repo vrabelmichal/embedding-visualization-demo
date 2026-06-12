@@ -65,7 +65,7 @@ function parseCSV(text: string): VisualizationData {
   return { objects }
 }
 
-function normalizeObject(obj: any): AstronomicalObject {
+function normalizeObject(obj: Record<string, unknown>): AstronomicalObject {
   return {
     ...obj,
     coadd_object_id: String(obj.coadd_object_id ?? obj.id ?? ''),

@@ -67,7 +67,10 @@ export function useViewState(objects: AstronomicalObject[]) {
 
   useEffect(() => {
     const initialView = computeInitialView(objects)
-    setViewState((prev) => (viewsEqual(prev, initialView) ? prev : initialView))
+    const handle = requestAnimationFrame(() => {
+      setViewState((prev) => (viewsEqual(prev, initialView) ? prev : initialView))
+    })
+    return () => cancelAnimationFrame(handle)
   }, [objects])
 
   const onViewStateChange = useCallback(

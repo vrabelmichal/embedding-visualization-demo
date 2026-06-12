@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import DeckGL from '@deck.gl/react'
 import { IconLayer } from '@deck.gl/layers'
 import { COORDINATE_SYSTEM, OrthographicView } from '@deck.gl/core'
+import type { MapViewState, ViewStateChangeParameters } from '@deck.gl/core'
 import type { AstronomicalObject, ColorMapping, ShapeMapping } from '../utils/types'
 import { useShapeMapping } from '../hooks/useShapeMapping'
 import { useColorMapping } from '../hooks/useColorMapping'
@@ -15,7 +16,7 @@ interface ScatterPlotProps {
   pointSize: number
   selected: AstronomicalObject | null
   viewState: EmbeddingViewState
-  onViewStateChange: (params: any) => void
+  onViewStateChange: (params: ViewStateChangeParameters) => void
   onHover: (info: { object: AstronomicalObject; x: number; y: number } | null) => void
   onClick: (object: AstronomicalObject | null) => void
   useColorColumn: boolean
@@ -194,18 +195,6 @@ export function ScatterPlot({
     return { otherData: other, mainData: main }
   }, [data, colorMapping, shapeMapping])
 
-  const getIcon = useMemo(() => {
-    if (shapeMapping?.column && shapeMapping.valueToShape) {
-      return (d: AstronomicalObject) => {
-        const value = String(d[shapeMapping.column!] ?? '').trim()
-        const shape = shapeMapping.valueToShape![value] ?? shapeMapping.defaultShape
-        if (shape && shape in mapping) return shape
-        return validateShape(d.embedding_shape)
-      }
-    }
-    return (d: AstronomicalObject) => validateShape(d.embedding_shape)
-  }, [shapeMapping, mapping])
-
   useEffect(() => {
     const raf = requestAnimationFrame(() => {
       setMounted(true)
@@ -218,7 +207,14 @@ export function ScatterPlot({
       pickable: true as const,
       iconAtlas: atlas,
       iconMapping: mapping,
-      getIcon,
+      getIcon: shapeMapping?.column && shapeMapping.valueToShape
+        ? (d: AstronomicalObject) => {
+            const value = String(d[shapeMapping.column!] ?? '').trim()
+            const shape = shapeMapping.valueToShape![value] ?? shapeMapping.defaultShape
+            if (shape && shape in mapping) return shape
+            return validateShape(d.embedding_shape)
+          }
+        : (d: AstronomicalObject) => validateShape(d.embedding_shape),
       getPosition: (d: AstronomicalObject): [number, number, number] => [d.embedding_x, d.embedding_y, 0],
       getSize: pointSize,
       sizeUnits: 'pixels' as const,
@@ -228,7 +224,7 @@ export function ScatterPlot({
       parameters: { depthTest: false },
       coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
     }),
-    [atlas, mapping, getIcon, pointSize],
+    [atlas, mapping, shapeMapping, pointSize],
   )
 
   const commonUpdateTriggers = useMemo(
@@ -288,7 +284,7 @@ export function ScatterPlot({
   }, [selected, pointSize, atlas, mapping])
 
   const layers = useMemo(() => {
-    return [otherLayer, mainLayer, highlightLayer].filter(Boolean) as any[]
+    return [otherLayer, mainLayer, highlightLayer].filter((l): l is IconLayer => l !== null)
   }, [otherLayer, mainLayer, highlightLayer])
 
   if (data.length === 0) {
@@ -308,7 +304,7 @@ export function ScatterPlot({
             touchRotate: false,
           }}
           layers={layers}
-          viewState={viewState as any}
+          viewState={viewState as unknown as MapViewState}
           onViewStateChange={onViewStateChange}
           style={{ width: '100%', height: '100%' }}
         />
