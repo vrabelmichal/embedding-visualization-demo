@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect, useRef } from 'react'
 import DeckGL from '@deck.gl/react'
 import { IconLayer } from '@deck.gl/layers'
 import { COORDINATE_SYSTEM, OrthographicView } from '@deck.gl/core'
-import type { MapViewState, ViewStateChangeParameters } from '@deck.gl/core'
+import type { ViewStateChangeParameters } from '@deck.gl/core'
 import type { AstronomicalObject, ColorMapping, ShapeMapping } from '../utils/types'
 import { useShapeMapping } from '../hooks/useShapeMapping'
 import { useColorMapping } from '../hooks/useColorMapping'
@@ -284,7 +284,7 @@ export function ScatterPlot({
   }, [selected, pointSize, atlas, mapping])
 
   const layers = useMemo(() => {
-    return [otherLayer, mainLayer, highlightLayer].filter((l): l is IconLayer => l !== null)
+    return [otherLayer, mainLayer, highlightLayer].filter((l) => l !== null) as IconLayer[]
   }, [otherLayer, mainLayer, highlightLayer])
 
   if (data.length === 0) {
@@ -295,7 +295,7 @@ export function ScatterPlot({
     <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
       {mounted && (
         <DeckGL
-          views={[new OrthographicView({ id: 'ortho', flipY: false })]}
+          views={new OrthographicView({ id: 'ortho', flipY: false })}
           controller={{
             dragPan: true,
             dragRotate: false,
@@ -304,7 +304,7 @@ export function ScatterPlot({
             touchRotate: false,
           }}
           layers={layers}
-          viewState={viewState as unknown as MapViewState}
+          viewState={viewState}
           onViewStateChange={onViewStateChange}
           style={{ width: '100%', height: '100%' }}
         />
