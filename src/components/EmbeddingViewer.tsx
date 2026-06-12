@@ -132,7 +132,7 @@ export function EmbeddingViewer() {
       ...config.colorMapping,
       mode: config.colorMapping.mode ?? effectiveData?.colorMapping?.mode,
     }
-  }, [config?.colorMapping, effectiveData?.colorMapping])
+  }, [config, effectiveData?.colorMapping])
 
   const hasCompleteColorMapping = useMemo(
     () => hasCompleteColorMappingFn(effectiveColorMapping),
