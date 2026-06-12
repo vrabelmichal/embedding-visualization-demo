@@ -138,6 +138,62 @@ export function ScatterPlot({
 
   const { atlas, mapping } = useMemo(() => buildAtlas(), [])
 
+  const { otherData, mainData } = useMemo(() => {
+    const hasCategoricalColor = colorMapping?.mode === 'categorical' && colorMapping.column && colorMapping.valueToColor
+    const hasShapeCats = shapeMapping?.column && shapeMapping.valueToShape
+
+    if (!hasCategoricalColor && !hasShapeCats) {
+      return { otherData: [] as AstronomicalObject[], mainData: data }
+    }
+
+    const colorCategories = hasCategoricalColor ? colorMapping.valueToColor! : undefined
+    const shapeCategories = hasShapeCats ? shapeMapping!.valueToShape! : undefined
+    const colorCol = hasCategoricalColor ? colorMapping.column! : undefined
+    const shapeCol = hasShapeCats ? shapeMapping!.column! : undefined
+
+    const other: AstronomicalObject[] = []
+    const main: AstronomicalObject[] = []
+
+    for (const obj of data) {
+      let isExplicitlyCategorized = false
+      let hasOtherLabel = false
+
+      if (colorCol && colorCategories) {
+        const val = String(obj[colorCol] ?? '').trim()
+        if (val) {
+          if (val.toLowerCase().includes('other')) {
+            hasOtherLabel = true
+          }
+          if (colorCategories[val]) {
+            isExplicitlyCategorized = true
+          }
+        }
+      }
+
+      if (shapeCol && shapeCategories) {
+        const val = String(obj[shapeCol] ?? '').trim()
+        if (val) {
+          if (val.toLowerCase().includes('other')) {
+            hasOtherLabel = true
+          }
+          if (shapeCategories[val]) {
+            isExplicitlyCategorized = true
+          }
+        }
+      }
+
+      if (hasOtherLabel) {
+        other.push(obj)
+      } else if (isExplicitlyCategorized) {
+        main.push(obj)
+      } else {
+        other.push(obj)
+      }
+    }
+
+    return { otherData: other, mainData: main }
+  }, [data, colorMapping, shapeMapping])
+
   const getIcon = useMemo(() => {
     if (shapeMapping?.column && shapeMapping.valueToShape) {
       return (d: AstronomicalObject) => {
@@ -157,35 +213,60 @@ export function ScatterPlot({
     return () => cancelAnimationFrame(raf)
   }, [])
 
-  const layer = useMemo(
-    () =>
-      new IconLayer({
-        id: 'astronomy-points',
-        data,
-        pickable: true,
-        iconAtlas: atlas,
-        iconMapping: mapping,
-        getIcon,
-        getPosition: (d: AstronomicalObject) => [d.embedding_x, d.embedding_y, 0],
-        getColor: (d: AstronomicalObject) => getColor(d),
-        getSize: pointSize,
-        sizeUnits: 'pixels',
-        sizeScale: 1,
-        sizeMinPixels: 4,
-        sizeMaxPixels: 64,
-        updateTriggers: {
-          getColor: [colorMapping, useColorColumn],
-          getIcon: [shapeMapping],
-          getSize: pointSize,
-        },
-        parameters: { depthTest: false },
-        coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
-        onHover: ({ object, x, y }) =>
-          onHover(object ? ({ object, x, y } as any) : null),
-        onClick: ({ object }) => onClick((object ?? null) as any),
-      }),
-    [data, getColor, getIcon, onClick, onHover, pointSize, atlas, mapping],
+  const sharedConfig = useMemo(
+    () => ({
+      pickable: true as const,
+      iconAtlas: atlas,
+      iconMapping: mapping,
+      getIcon,
+      getPosition: (d: AstronomicalObject): [number, number, number] => [d.embedding_x, d.embedding_y, 0],
+      getSize: pointSize,
+      sizeUnits: 'pixels' as const,
+      sizeScale: 1,
+      sizeMinPixels: 4,
+      sizeMaxPixels: 64,
+      parameters: { depthTest: false },
+      coordinateSystem: COORDINATE_SYSTEM.CARTESIAN,
+    }),
+    [atlas, mapping, getIcon, pointSize],
   )
+
+  const commonUpdateTriggers = useMemo(
+    () => ({
+      getColor: [colorMapping, useColorColumn],
+      getIcon: [shapeMapping],
+      getSize: pointSize,
+    }),
+    [colorMapping, useColorColumn, shapeMapping, pointSize],
+  )
+
+  const otherLayer = useMemo(() => {
+    if (otherData.length === 0) return null
+    return new IconLayer({
+      ...sharedConfig,
+      id: 'astronomy-points-other',
+      data: otherData,
+      getColor: (d: AstronomicalObject) => getColor(d),
+      updateTriggers: commonUpdateTriggers,
+      onHover: ({ object, x, y }) =>
+        onHover(object ? ({ object, x, y } as { object: AstronomicalObject; x: number; y: number }) : null),
+      onClick: ({ object }) => onClick((object ?? null) as unknown as AstronomicalObject | null),
+    })
+  }, [otherData, sharedConfig, getColor, commonUpdateTriggers, onHover, onClick])
+
+  const mainLayer = useMemo(() => {
+    if (mainData.length === 0) return null
+    return new IconLayer({
+      ...sharedConfig,
+      id: 'astronomy-points-main',
+      data: mainData,
+      getColor: (d: AstronomicalObject) => getColor(d),
+      updateTriggers: commonUpdateTriggers,
+      onHover: ({ object, x, y }) =>
+        onHover(object ? ({ object, x, y } as { object: AstronomicalObject; x: number; y: number }) : null),
+      onClick: ({ object }) => onClick((object ?? null) as unknown as AstronomicalObject | null),
+    })
+  }, [mainData, sharedConfig, getColor, commonUpdateTriggers, onHover, onClick])
 
   const highlightLayer = useMemo(() => {
     if (!selected) return null
@@ -207,8 +288,8 @@ export function ScatterPlot({
   }, [selected, pointSize, atlas, mapping])
 
   const layers = useMemo(() => {
-    return [layer, highlightLayer].filter(Boolean) as any[]
-  }, [layer, highlightLayer])
+    return [otherLayer, mainLayer, highlightLayer].filter(Boolean) as any[]
+  }, [otherLayer, mainLayer, highlightLayer])
 
   if (data.length === 0) {
     return null

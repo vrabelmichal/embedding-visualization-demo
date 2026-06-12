@@ -95,6 +95,37 @@ Categories also support a color-to-label format:
 
 ---
 
+### Context points z-ordering
+
+When a config file provides a categorical mapping (`colorMapping` with `type: "categorical"` and/or `shapeMapping`), points that do **not** match any explicit category are treated as context/background points and rendered behind the explicitly categorized ones.
+
+**Rules:**
+
+- A point is rendered **underneath** if:
+  - Its column value does not appear as a key in the `categories` mapping (falls through to `defaultColor` / `defaultShape`), **or**
+  - Its column value (case-insensitive) contains the word `"other"`.
+- A point is rendered **on top** if:
+  - Its column value matches an explicit entry in the `categories` mapping, **and** the value does not contain `"other"`.
+
+**Example:** With the config below, only points where `predicted_class_display` equals `"class_9: Edge-on Galaxies with a Bulge"` are drawn on top. All other values — regardless of what they are — are context points and drawn underneath.
+
+```json
+{
+  "colorMapping": {
+    "type": "categorical",
+    "column": "predicted_class_display",
+    "categories": {
+      "class_9: Edge-on Galaxies with a Bulge": "#2a9d8f"
+    },
+    "defaultColor": "#f4f4f9"
+  }
+}
+```
+
+When no config is loaded, or when using only a continuous `colorMapping`, all points render in a single layer with no z-ordering applied.
+
+---
+
 ### Controlling which shapes points are drawn with
 
 There are two approaches, depending on how your data is structured:
