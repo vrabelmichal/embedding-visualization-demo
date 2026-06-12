@@ -71,9 +71,9 @@ function normalizeObject(obj: Record<string, unknown>): AstronomicalObject {
     coadd_object_id: String(obj.coadd_object_id ?? obj.id ?? ''),
     embedding_x: Number(obj.embedding_x ?? obj.x ?? 0),
     embedding_y: Number(obj.embedding_y ?? obj.y ?? 0),
-    image_url: obj.image_url ?? obj.url ?? '',
-    color: obj.color,
-    embedding_shape: validateShape(obj.embedding_shape),
+    image_url: String(obj.image_url ?? obj.url ?? ''),
+    color: typeof obj.color === 'string' ? obj.color : undefined,
+    embedding_shape: validateShape(typeof obj.embedding_shape === 'string' ? obj.embedding_shape : undefined),
   }
 }
 
