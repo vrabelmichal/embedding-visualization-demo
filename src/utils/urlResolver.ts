@@ -5,6 +5,103 @@ export interface ResolvedUrls {
   cfg: string
 }
 
+export interface DisplayUrls {
+  emb: string
+  cfg: string
+  embHref: string | null
+  cfgHref: string | null
+}
+
+export function getDisplayUrls(): DisplayUrls | null {
+  const params = new URLSearchParams(window.location.search)
+  const emb = params.get('emb')
+  const cfg = params.get('cfg')
+  if (!emb && !cfg) return null
+
+  const base = params.get('base')
+
+  try {
+    return {
+      emb: sanitizeDisplayUrl(emb || '', base),
+      cfg: sanitizeDisplayUrl(cfg || '', base),
+      embHref: buildDisplayHref(emb || '', base),
+      cfgHref: buildDisplayHref(cfg || '', base),
+    }
+  } catch {
+    return null
+  }
+}
+
+function buildDisplayHref(raw: string, base: string | null): string | null {
+  if (!raw) return null
+  try {
+    const url = new URL(raw)
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url.href
+    }
+    return null
+  } catch {
+    if (base) {
+      try {
+        const url = new URL(raw, base)
+        if (url.protocol === 'http:' || url.protocol === 'https:') {
+          return url.href
+        }
+      } catch {
+        // fall through
+      }
+    }
+  }
+  return null
+}
+
+function sanitizeDisplayUrl(raw: string, base: string | null): string {
+  if (!raw) return ''
+
+  let url: URL
+  let hasRealOrigin = false
+
+  try {
+    url = new URL(raw)
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      hasRealOrigin = true
+    }
+  } catch {
+    if (base) {
+      try {
+        url = new URL(raw, base)
+        hasRealOrigin = true
+      } catch {
+        try {
+          url = new URL(raw, 'http://_')
+        } catch {
+          return raw.slice(0, 200)
+        }
+      }
+    } else {
+      try {
+        url = new URL(raw, 'http://_')
+      } catch {
+        return raw.slice(0, 200)
+      }
+    }
+  }
+
+  const path = url.pathname
+  const origin = hasRealOrigin ? url.origin : ''
+
+  if (path && path !== '/') return origin + path
+
+  if (hasRealOrigin) return origin + '/'
+
+  try {
+    const segments = decodeURIComponent(raw).split('/')
+    return segments[segments.length - 1] || raw.slice(0, 200)
+  } catch {
+    return raw.slice(0, 200)
+  }
+}
+
 export function isAbsoluteUrl(value: string): boolean {
   return ABSOLUTE_URL_PATTERN.test(value)
 }

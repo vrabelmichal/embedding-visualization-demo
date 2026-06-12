@@ -12,7 +12,7 @@ const SCHEMES: Record<string, string[]> = {
 }
 
 function colorToRgba(input: string, alpha = 1): [number, number, number, number] {
-  const parsed = parseColor(input)
+  const parsed = parseColor(input)?.rgb()
   if (!parsed) return DEFAULT_COLOR
 
   return [
